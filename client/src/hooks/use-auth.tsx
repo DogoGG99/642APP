@@ -23,13 +23,16 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+
+  // Use staleTime: 0 to ensure we always have fresh auth data
   const {
     data: user,
     error,
     isLoading,
-  } = useQuery<SelectUser | undefined, Error>({
+  } = useQuery<SelectUser | null>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+    staleTime: 0,
   });
 
   const loginMutation = useMutation({
@@ -39,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      queryClient.invalidateQueries(); // Invalidate all queries to refresh data
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
@@ -60,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      queryClient.invalidateQueries(); // Invalidate all queries to refresh data
       toast({
         title: "Welcome!",
         description: "Your account has been created successfully.",
@@ -80,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
+      queryClient.invalidateQueries(); // Invalidate all queries after logout
       toast({
         title: "Goodbye!",
         description: "You have been logged out successfully.",
