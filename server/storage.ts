@@ -1,8 +1,26 @@
 import session from "express-session";
-import createMemoryStore from "memorystore";
-import { User, Client, Inventory, Reservation, Bill, InsertUser, InsertClient, InsertInventory, InsertReservation, InsertBill } from "@shared/schema";
+import connectPg from "connect-pg-simple";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import {
+  users,
+  clients,
+  inventory,
+  reservations,
+  bills,
+  type User,
+  type Client,
+  type Inventory,
+  type Reservation,
+  type Bill,
+  type InsertUser,
+  type InsertClient,
+  type InsertInventory,
+  type InsertReservation,
+  type InsertBill,
+} from "@shared/schema";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   // Users
@@ -38,159 +56,166 @@ export interface IStorage {
   updateBill(id: number, bill: Partial<InsertBill>): Promise<Bill>;
   deleteBill(id: number): Promise<void>;
 
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private clients: Map<number, Client>;
-  private inventory: Map<number, Inventory>;
-  private reservations: Map<number, Reservation>;
-  private bills: Map<number, Bill>;
-  private currentId: number;
-  sessionStore: session.SessionStore;
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.clients = new Map();
-    this.inventory = new Map();
-    this.reservations = new Map();
-    this.bills = new Map();
-    this.currentId = 1;
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+    // Fix: Use the pool directly from db.ts instead of accessing through config
+    this.sessionStore = new PostgresSessionStore({
+      pool: db.$client,
+      createTableIfMissing: true,
     });
   }
 
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username));
+    return user;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
   }
 
   // Client methods
   async getClients(): Promise<Client[]> {
-    return Array.from(this.clients.values());
+    return await db.select().from(clients);
   }
 
   async getClient(id: number): Promise<Client | undefined> {
-    return this.clients.get(id);
+    const [client] = await db.select().from(clients).where(eq(clients.id, id));
+    return client;
   }
 
   async createClient(client: InsertClient): Promise<Client> {
-    const id = this.currentId++;
-    const newClient = { ...client, id };
-    this.clients.set(id, newClient);
+    const [newClient] = await db.insert(clients).values(client).returning();
     return newClient;
   }
 
   async updateClient(id: number, client: Partial<InsertClient>): Promise<Client> {
-    const existing = await this.getClient(id);
-    if (!existing) throw new Error("Client not found");
-    const updated = { ...existing, ...client };
-    this.clients.set(id, updated);
+    const [updated] = await db
+      .update(clients)
+      .set(client)
+      .where(eq(clients.id, id))
+      .returning();
+    if (!updated) throw new Error("Client not found");
     return updated;
   }
 
   async deleteClient(id: number): Promise<void> {
-    this.clients.delete(id);
+    await db.delete(clients).where(eq(clients.id, id));
   }
 
   // Inventory methods
   async getInventory(): Promise<Inventory[]> {
-    return Array.from(this.inventory.values());
+    return await db.select().from(inventory);
   }
 
   async getInventoryItem(id: number): Promise<Inventory | undefined> {
-    return this.inventory.get(id);
+    const [item] = await db.select().from(inventory).where(eq(inventory.id, id));
+    return item;
   }
 
   async createInventoryItem(item: InsertInventory): Promise<Inventory> {
-    const id = this.currentId++;
-    const newItem = { ...item, id };
-    this.inventory.set(id, newItem);
+    const [newItem] = await db.insert(inventory).values(item).returning();
     return newItem;
   }
 
-  async updateInventoryItem(id: number, item: Partial<InsertInventory>): Promise<Inventory> {
-    const existing = await this.getInventoryItem(id);
-    if (!existing) throw new Error("Inventory item not found");
-    const updated = { ...existing, ...item };
-    this.inventory.set(id, updated);
+  async updateInventoryItem(
+    id: number,
+    item: Partial<InsertInventory>,
+  ): Promise<Inventory> {
+    const [updated] = await db
+      .update(inventory)
+      .set(item)
+      .where(eq(inventory.id, id))
+      .returning();
+    if (!updated) throw new Error("Inventory item not found");
     return updated;
   }
 
   async deleteInventoryItem(id: number): Promise<void> {
-    this.inventory.delete(id);
+    await db.delete(inventory).where(eq(inventory.id, id));
   }
 
   // Reservation methods
   async getReservations(): Promise<Reservation[]> {
-    return Array.from(this.reservations.values());
+    return await db.select().from(reservations);
   }
 
   async getReservation(id: number): Promise<Reservation | undefined> {
-    return this.reservations.get(id);
+    const [reservation] = await db
+      .select()
+      .from(reservations)
+      .where(eq(reservations.id, id));
+    return reservation;
   }
 
   async createReservation(reservation: InsertReservation): Promise<Reservation> {
-    const id = this.currentId++;
-    const newReservation = { ...reservation, id };
-    this.reservations.set(id, newReservation);
+    const [newReservation] = await db
+      .insert(reservations)
+      .values(reservation)
+      .returning();
     return newReservation;
   }
 
-  async updateReservation(id: number, reservation: Partial<InsertReservation>): Promise<Reservation> {
-    const existing = await this.getReservation(id);
-    if (!existing) throw new Error("Reservation not found");
-    const updated = { ...existing, ...reservation };
-    this.reservations.set(id, updated);
+  async updateReservation(
+    id: number,
+    reservation: Partial<InsertReservation>,
+  ): Promise<Reservation> {
+    const [updated] = await db
+      .update(reservations)
+      .set(reservation)
+      .where(eq(reservations.id, id))
+      .returning();
+    if (!updated) throw new Error("Reservation not found");
     return updated;
   }
 
   async deleteReservation(id: number): Promise<void> {
-    this.reservations.delete(id);
+    await db.delete(reservations).where(eq(reservations.id, id));
   }
 
   // Bill methods
   async getBills(): Promise<Bill[]> {
-    return Array.from(this.bills.values());
+    return await db.select().from(bills);
   }
 
   async getBill(id: number): Promise<Bill | undefined> {
-    return this.bills.get(id);
+    const [bill] = await db.select().from(bills).where(eq(bills.id, id));
+    return bill;
   }
 
   async createBill(bill: InsertBill): Promise<Bill> {
-    const id = this.currentId++;
-    const newBill = { ...bill, id };
-    this.bills.set(id, newBill);
+    const [newBill] = await db.insert(bills).values(bill).returning();
     return newBill;
   }
 
   async updateBill(id: number, bill: Partial<InsertBill>): Promise<Bill> {
-    const existing = await this.getBill(id);
-    if (!existing) throw new Error("Bill not found");
-    const updated = { ...existing, ...bill };
-    this.bills.set(id, updated);
+    const [updated] = await db
+      .update(bills)
+      .set(bill)
+      .where(eq(bills.id, id))
+      .returning();
+    if (!updated) throw new Error("Bill not found");
     return updated;
   }
 
   async deleteBill(id: number): Promise<void> {
-    this.bills.delete(id);
+    await db.delete(bills).where(eq(bills.id, id));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
