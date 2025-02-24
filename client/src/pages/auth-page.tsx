@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +27,11 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
 
+  if (user) {
+    navigate("/");
+    return null;
+  }
+
   const loginForm = useForm({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
@@ -42,19 +46,6 @@ export default function AuthPage() {
       username: "",
       password: "",
     },
-  });
-
-  if (user) {
-    navigate("/");
-    return null;
-  }
-
-  const onLogin = loginForm.handleSubmit((data) => {
-    loginMutation.mutate(data);
-  });
-
-  const onRegister = registerForm.handleSubmit((data) => {
-    registerMutation.mutate(data);
   });
 
   return (
@@ -84,9 +75,15 @@ export default function AuthPage() {
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
+
               <TabsContent value="login">
                 <Form {...loginForm}>
-                  <form onSubmit={onLogin} className="space-y-4">
+                  <form
+                    onSubmit={loginForm.handleSubmit((data) =>
+                      loginMutation.mutate(data)
+                    )}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={loginForm.control}
                       name="username"
@@ -94,7 +91,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input placeholder="Enter username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -107,7 +104,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Enter password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -123,9 +124,15 @@ export default function AuthPage() {
                   </form>
                 </Form>
               </TabsContent>
+
               <TabsContent value="register">
                 <Form {...registerForm}>
-                  <form onSubmit={onRegister} className="space-y-4">
+                  <form
+                    onSubmit={registerForm.handleSubmit((data) =>
+                      registerMutation.mutate(data)
+                    )}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={registerForm.control}
                       name="username"
@@ -133,7 +140,7 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input placeholder="Choose username" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -146,7 +153,11 @@ export default function AuthPage() {
                         <FormItem>
                           <FormLabel>Password</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input
+                              type="password"
+                              placeholder="Choose password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -157,7 +168,9 @@ export default function AuthPage() {
                       className="w-full"
                       disabled={registerMutation.isPending}
                     >
-                      {registerMutation.isPending ? "Creating account..." : "Create account"}
+                      {registerMutation.isPending
+                        ? "Creating account..."
+                        : "Create Account"}
                     </Button>
                   </form>
                 </Form>
