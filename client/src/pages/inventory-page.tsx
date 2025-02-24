@@ -57,7 +57,7 @@ export default function InventoryPage() {
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertInventory) => {
-      const res = await apiRequest("POST", "/api/inventory", data);
+      const res = await apiRequest("POST", "/api/inventory", data, { credentials: 'include' });
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to create item");
@@ -175,10 +175,14 @@ export default function InventoryPage() {
       price: Number(data.price),
     };
 
-    if (editingItem) {
-      updateMutation.mutate({ id: editingItem.id, data: formattedData });
-    } else {
-      createMutation.mutate(formattedData);
+    try {
+      if (editingItem) {
+        updateMutation.mutate({ id: editingItem.id, data: formattedData });
+      } else {
+        createMutation.mutate(formattedData);
+      }
+    } catch (error) {
+      console.error('Mutation error:', error);
     }
   }
 
