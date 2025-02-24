@@ -1,6 +1,6 @@
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { db } from "./db";
+import { db, pool } from "./db"; // Added pool import
 import { eq } from "drizzle-orm";
 import {
   users,
@@ -63,9 +63,9 @@ export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    // Fix: Use the pool directly from db.ts instead of accessing through config
+    // Fix: Use the pool directly from db.ts
     this.sessionStore = new PostgresSessionStore({
-      pool: db.$client,
+      pool: pool,
       createTableIfMissing: true,
     });
   }

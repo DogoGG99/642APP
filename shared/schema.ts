@@ -20,13 +20,13 @@ export const inventory = pgTable("inventory", {
   name: text("name").notNull(),
   description: text("description"),
   quantity: integer("quantity").notNull(),
-  price: decimal("price").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
 });
 
 export const reservations = pgTable("reservations", {
   id: serial("id").primaryKey(),
   clientId: integer("client_id").notNull(),
-  date: timestamp("date").notNull(),
+  date: timestamp("date", { mode: 'string' }).notNull(),
   status: text("status").notNull(),
   notes: text("notes"),
 });
@@ -34,9 +34,9 @@ export const reservations = pgTable("reservations", {
 export const bills = pgTable("bills", {
   id: serial("id").primaryKey(),
   clientId: integer("client_id").notNull(),
-  amount: decimal("amount").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull(),
-  date: timestamp("date").notNull(),
+  date: timestamp("date", { mode: 'string' }).notNull(),
 });
 
 // Insert schemas
@@ -46,9 +46,22 @@ export const insertUserSchema = createInsertSchema(users).pick({
 });
 
 export const insertClientSchema = createInsertSchema(clients);
-export const insertInventorySchema = createInsertSchema(inventory);
-export const insertReservationSchema = createInsertSchema(reservations);
-export const insertBillSchema = createInsertSchema(bills);
+
+export const insertInventorySchema = createInsertSchema(inventory).extend({
+  quantity: z.coerce.number(),
+  price: z.coerce.number()
+});
+
+export const insertReservationSchema = createInsertSchema(reservations).extend({
+  clientId: z.coerce.number(),
+  date: z.string().transform(val => new Date(val).toISOString())
+});
+
+export const insertBillSchema = createInsertSchema(bills).extend({
+  clientId: z.coerce.number(),
+  amount: z.coerce.number(),
+  date: z.string().transform(val => new Date(val).toISOString())
+});
 
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
