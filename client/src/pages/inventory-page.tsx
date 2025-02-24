@@ -48,9 +48,17 @@ export default function InventoryPage() {
     },
   });
 
+  const { data: inventory, isLoading } = useQuery<Inventory[]>({
+    queryKey: ["/api/inventory"],
+  });
+
   const createMutation = useMutation({
     mutationFn: async (data: InsertInventory) => {
       const res = await apiRequest("POST", "/api/inventory", data);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to create item");
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -62,11 +70,22 @@ export default function InventoryPage() {
         description: "Inventory item created successfully",
       });
     },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: Partial<InsertInventory> }) => {
       const res = await apiRequest("PATCH", `/api/inventory/${id}`, data);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to update item");
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -79,11 +98,22 @@ export default function InventoryPage() {
         description: "Inventory item updated successfully",
       });
     },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/inventory/${id}`);
+      const res = await apiRequest("DELETE", `/api/inventory/${id}`);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to delete item");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
@@ -92,17 +122,27 @@ export default function InventoryPage() {
         description: "Inventory item deleted successfully",
       });
     },
-  });
-
-  const { data: inventory, isLoading } = useQuery<Inventory[]>({
-    queryKey: ["/api/inventory"],
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   function onSubmit(data: InsertInventory) {
+    // Ensure numeric fields are properly converted
+    const formattedData = {
+      ...data,
+      quantity: Number(data.quantity),
+      price: Number(data.price),
+    };
+
     if (editingItem) {
-      updateMutation.mutate({ id: editingItem.id, data });
+      updateMutation.mutate({ id: editingItem.id, data: formattedData });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(formattedData);
     }
   }
 
@@ -154,7 +194,6 @@ export default function InventoryPage() {
                         <Textarea
                           placeholder="Enter item description"
                           {...field}
-                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
@@ -173,7 +212,7 @@ export default function InventoryPage() {
                           placeholder="Enter quantity"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(parseInt(e.target.value))
+                            field.onChange(parseInt(e.target.value) || 0)
                           }
                         />
                       </FormControl>
@@ -194,7 +233,7 @@ export default function InventoryPage() {
                           placeholder="Enter price"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value))
+                            field.onChange(parseFloat(e.target.value) || 0)
                           }
                         />
                       </FormControl>
@@ -235,16 +274,20 @@ export default function InventoryPage() {
                   <TableCell>{item.name}</TableCell>
                   <TableCell>{item.description}</TableCell>
                   <TableCell>{item.quantity}</TableCell>
-                  <TableCell>${item.price.toFixed(2)}</TableCell>
+                  <TableCell>${typeof item.price === 'string' ? parseFloat(item.price).toFixed(2) : item.price.toFixed(2)}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          const itemToEdit = { ...item, price: Number(item.price) };
-                          setEditingItem(itemToEdit);
-                          form.reset(itemToEdit);
+                          setEditingItem(item);
+                          form.reset({
+                            name: item.name,
+                            description: item.description || "",
+                            quantity: item.quantity,
+                            price: typeof item.price === 'string' ? parseFloat(item.price) : item.price,
+                          });
                           setIsOpen(true);
                         }}
                       >
