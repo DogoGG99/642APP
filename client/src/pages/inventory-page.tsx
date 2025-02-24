@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Table,
   TableBody,
@@ -34,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 export default function InventoryPage() {
+  const { user } = useAuth(); // Add auth context
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Inventory | null>(null);
@@ -50,6 +52,7 @@ export default function InventoryPage() {
 
   const { data: inventory, isLoading } = useQuery<Inventory[]>({
     queryKey: ["/api/inventory"],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 
   const createMutation = useMutation({
@@ -71,11 +74,19 @@ export default function InventoryPage() {
       });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (error.message.includes("401")) {
+        toast({
+          title: "Error",
+          description: "Please log in to add inventory items",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -99,11 +110,19 @@ export default function InventoryPage() {
       });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (error.message.includes("401")) {
+        toast({
+          title: "Error",
+          description: "Please log in to update inventory items",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -123,15 +142,32 @@ export default function InventoryPage() {
       });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (error.message.includes("401")) {
+        toast({
+          title: "Error",
+          description: "Please log in to delete inventory items",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
   function onSubmit(data: InsertInventory) {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Please log in to manage inventory",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Ensure numeric fields are properly converted
     const formattedData = {
       ...data,
@@ -194,6 +230,7 @@ export default function InventoryPage() {
                         <Textarea
                           placeholder="Enter item description"
                           {...field}
+                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
