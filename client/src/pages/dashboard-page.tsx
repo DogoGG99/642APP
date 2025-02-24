@@ -17,21 +17,22 @@ import {
   Bar,
 } from "recharts";
 import { Users, Package, Calendar, Receipt } from "lucide-react";
+import { Client, Inventory, Reservation, Bill } from "@shared/schema";
 
 export default function DashboardPage() {
-  const { data: clients } = useQuery({
+  const { data: clients = [] } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
   });
 
-  const { data: inventory } = useQuery({
+  const { data: inventory = [] } = useQuery<Inventory[]>({
     queryKey: ["/api/inventory"],
   });
 
-  const { data: reservations } = useQuery({
+  const { data: reservations = [] } = useQuery<Reservation[]>({
     queryKey: ["/api/reservations"],
   });
 
-  const { data: bills } = useQuery({
+  const { data: bills = [] } = useQuery<Bill[]>({
     queryKey: ["/api/bills"],
   });
 
@@ -68,7 +69,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{clients?.length || 0}</div>
+            <div className="text-2xl font-bold">{clients.length}</div>
           </CardContent>
         </Card>
 
@@ -80,7 +81,7 @@ export default function DashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{inventory?.length || 0}</div>
+            <div className="text-2xl font-bold">{inventory.length}</div>
           </CardContent>
         </Card>
 
@@ -92,7 +93,7 @@ export default function DashboardPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{reservations?.length || 0}</div>
+            <div className="text-2xl font-bold">{reservations.length}</div>
           </CardContent>
         </Card>
 
@@ -104,7 +105,7 @@ export default function DashboardPage() {
             <Receipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{bills?.length || 0}</div>
+            <div className="text-2xl font-bold">{bills.length}</div>
           </CardContent>
         </Card>
       </div>

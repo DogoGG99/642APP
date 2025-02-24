@@ -38,10 +38,6 @@ export default function InventoryPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Inventory | null>(null);
 
-  const { data: inventory, isLoading } = useQuery<Inventory[]>({
-    queryKey: ["/api/inventory"],
-  });
-
   const form = useForm<InsertInventory>({
     resolver: zodResolver(insertInventorySchema),
     defaultValues: {
@@ -96,6 +92,10 @@ export default function InventoryPage() {
         description: "Inventory item deleted successfully",
       });
     },
+  });
+
+  const { data: inventory, isLoading } = useQuery<Inventory[]>({
+    queryKey: ["/api/inventory"],
   });
 
   function onSubmit(data: InsertInventory) {
@@ -154,6 +154,7 @@ export default function InventoryPage() {
                         <Textarea
                           placeholder="Enter item description"
                           {...field}
+                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
@@ -241,8 +242,9 @@ export default function InventoryPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          setEditingItem(item);
-                          form.reset(item);
+                          const itemToEdit = { ...item, price: Number(item.price) };
+                          setEditingItem(itemToEdit);
+                          form.reset(itemToEdit);
                           setIsOpen(true);
                         }}
                       >
