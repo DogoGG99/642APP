@@ -5,16 +5,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export function LanguageSelector() {
   const { language, setLanguage, t } = useLanguage();
-  
+
   return (
-    <Select value={language} onValueChange={setLanguage}>
-      <SelectTrigger className="w-[130px]">
-        <SelectValue placeholder={t('language.select')} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="en">English</SelectItem>
-        <SelectItem value="es">Español</SelectItem>
-      </SelectContent>
-    </Select>
+    <div className="language-selector">
+      <Select
+        value={language}
+        onValueChange={(value) => setLanguage(value as 'en' | 'es')}
+      >
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder={t('language.select')} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="en">{t('language.english')}</SelectItem>
+          <SelectItem value="es">{t('language.spanish')}</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
   );
 }

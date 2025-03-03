@@ -1,96 +1,85 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Define translations
-const translations = {
+type Language = 'en' | 'es';
+
+type Translations = {
+  [key in Language]: {
+    [key: string]: string;
+  };
+};
+
+const translations: Translations = {
   en: {
-    auth: {
-      welcome: 'Welcome',
-      loginOrRegister: 'Sign in to your account or create a new one',
-      login: 'Login',
-      register: 'Register',
-      username: 'Username',
-      password: 'Password',
-      confirmPassword: 'Confirm Password',
-      usernamePlaceholder: 'Enter your username',
-      passwordPlaceholder: 'Enter your password',
-      confirmPasswordPlaceholder: 'Confirm your password',
-      loginButton: 'Sign in',
-      registerButton: 'Create account'
-    },
-    validation: {
-      usernameMin: 'Username must be at least 3 characters',
-      passwordMin: 'Password must be at least 6 characters',
-      passwordsMatch: 'Passwords must match'
-    },
-    language: {
-      select: 'Language'
-    },
-    sidebar: {
-      dashboard: 'Dashboard',
-      settings: 'Settings',
-      logout: 'Logout'
-    }
+    'auth.welcome': 'Welcome',
+    'auth.loginOrRegister': 'Sign in to your account or create a new one',
+    'auth.login': 'Login',
+    'auth.register': 'Register',
+    'auth.email': 'Email',
+    'auth.password': 'Password',
+    'auth.submit': 'Submit',
+    'auth.forgotPassword': 'Forgot Password?',
+    'auth.dontHaveAccount': 'Don\'t have an account?',
+    'auth.createAccount': 'Create Account',
+    'auth.name': 'Name',
+    'auth.confirmPassword': 'Confirm Password',
+    'auth.alreadyHaveAccount': 'Already have an account?',
+    'auth.signIn': 'Sign In',
+    'nav.dashboard': 'Dashboard',
+    'nav.settings': 'Settings',
+    'nav.profile': 'Profile',
+    'language.select': 'Select Language',
+    'language.english': 'English',
+    'language.spanish': 'Spanish'
   },
   es: {
-    auth: {
-      welcome: 'Bienvenido',
-      loginOrRegister: 'Inicia sesión o crea una cuenta nueva',
-      login: 'Iniciar Sesión',
-      register: 'Registrarse',
-      username: 'Usuario',
-      password: 'Contraseña',
-      confirmPassword: 'Confirmar Contraseña',
-      usernamePlaceholder: 'Ingresa tu usuario',
-      passwordPlaceholder: 'Ingresa tu contraseña',
-      confirmPasswordPlaceholder: 'Confirma tu contraseña',
-      loginButton: 'Iniciar Sesión',
-      registerButton: 'Crear cuenta'
-    },
-    validation: {
-      usernameMin: 'El usuario debe tener al menos 3 caracteres',
-      passwordMin: 'La contraseña debe tener al menos 6 caracteres',
-      passwordsMatch: 'Las contraseñas deben coincidir'
-    },
-    language: {
-      select: 'Idioma'
-    },
-    sidebar: {
-      dashboard: 'Panel',
-      settings: 'Configuración',
-      logout: 'Cerrar Sesión'
-    }
+    'auth.welcome': 'Bienvenido',
+    'auth.loginOrRegister': 'Inicia sesión en tu cuenta o crea una nueva',
+    'auth.login': 'Iniciar Sesión',
+    'auth.register': 'Registrarse',
+    'auth.email': 'Correo electrónico',
+    'auth.password': 'Contraseña',
+    'auth.submit': 'Enviar',
+    'auth.forgotPassword': '¿Olvidaste tu contraseña?',
+    'auth.dontHaveAccount': '¿No tienes una cuenta?',
+    'auth.createAccount': 'Crear Cuenta',
+    'auth.name': 'Nombre',
+    'auth.confirmPassword': 'Confirmar Contraseña',
+    'auth.alreadyHaveAccount': '¿Ya tienes una cuenta?',
+    'auth.signIn': 'Iniciar Sesión',
+    'nav.dashboard': 'Panel',
+    'nav.settings': 'Configuración',
+    'nav.profile': 'Perfil',
+    'language.select': 'Seleccionar Idioma',
+    'language.english': 'Inglés',
+    'language.spanish': 'Español'
   }
 };
 
-type Language = 'en' | 'es';
-type TranslationKey = keyof typeof translations.en;
-
 interface LanguageContextType {
   language: Language;
-  setLanguage: (lang: Language) => void;
+  setLanguage: (language: Language) => void;
   t: (key: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+}
+
+interface LanguageProviderProps {
+  children: ReactNode;
+}
+
+export function LanguageProvider({ children }: LanguageProviderProps) {
   const [language, setLanguage] = useState<Language>('en');
 
-  // Translation function
   const t = (key: string): string => {
-    const keys = key.split('.');
-    let translation: any = translations[language];
-    
-    for (const k of keys) {
-      if (translation[k] === undefined) {
-        console.warn(`Translation key not found: ${key}`);
-        return key;
-      }
-      translation = translation[k];
-    }
-    
-    return translation;
+    return translations[language][key] || key;
   };
 
   return (
@@ -98,12 +87,4 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </LanguageContext.Provider>
   );
-};
-
-export const useLanguage = (): LanguageContextType => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
-  return context;
-};
+}
