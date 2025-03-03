@@ -10,6 +10,8 @@ import {
   Receipt,
   LogOut,
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -22,6 +24,7 @@ const navigation = [
 export default function SidebarNav() {
   const [location, navigate] = useLocation();
   const { logoutMutation } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <div className="flex flex-col w-64 min-h-screen p-4 border-r border-border bg-sidebar">
@@ -58,8 +61,11 @@ export default function SidebarNav() {
           onClick={() => logoutMutation.mutate()}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          Logout
+          {t('nav.logout')} {/*This line is added to translate the logout button*/}
         </Button>
+        <div className="mt-4 px-2"> {/*This div is added to include the LanguageSelector component*/}
+          <LanguageSelector />
+        </div>
       </div>
     </div>
   );
