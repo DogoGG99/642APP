@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'en' | 'es';
@@ -22,7 +21,7 @@ export const translations = {
     'auth.registerButton': 'Register',
     'auth.switchToRegister': 'Need an account? Register',
     'auth.switchToLogin': 'Already have an account? Login',
-    
+
     // Navigation
     'nav.dashboard': 'Dashboard',
     'nav.clients': 'Clients',
@@ -30,7 +29,7 @@ export const translations = {
     'nav.reservations': 'Reservations',
     'nav.bills': 'Bills',
     'nav.logout': 'Logout',
-    
+
     // Clients
     'clients.title': 'Clients',
     'clients.name': 'Name',
@@ -39,7 +38,7 @@ export const translations = {
     'clients.add': 'Add Client',
     'clients.edit': 'Edit Client',
     'clients.delete': 'Delete Client',
-    
+
     // Inventory
     'inventory.title': 'Inventory',
     'inventory.name': 'Name',
@@ -49,7 +48,7 @@ export const translations = {
     'inventory.add': 'Add Item',
     'inventory.edit': 'Edit Item',
     'inventory.delete': 'Delete Item',
-    
+
     // Reservations
     'reservations.title': 'Reservations',
     'reservations.client': 'Client',
@@ -59,7 +58,7 @@ export const translations = {
     'reservations.add': 'Add Reservation',
     'reservations.edit': 'Edit Reservation',
     'reservations.delete': 'Delete Reservation',
-    
+
     // Bills
     'bills.title': 'Bills',
     'bills.client': 'Client',
@@ -69,7 +68,7 @@ export const translations = {
     'bills.add': 'Add Bill',
     'bills.edit': 'Edit Bill',
     'bills.delete': 'Delete Bill',
-    
+
     // Common
     'common.save': 'Save',
     'common.cancel': 'Cancel',
@@ -89,7 +88,7 @@ export const translations = {
     'auth.registerButton': 'Registrarse',
     'auth.switchToRegister': '¿Necesitas una cuenta? Regístrate',
     'auth.switchToLogin': '¿Ya tienes una cuenta? Inicia sesión',
-    
+
     // Navigation
     'nav.dashboard': 'Panel',
     'nav.clients': 'Clientes',
@@ -97,7 +96,7 @@ export const translations = {
     'nav.reservations': 'Reservas',
     'nav.bills': 'Facturas',
     'nav.logout': 'Cerrar Sesión',
-    
+
     // Clients
     'clients.title': 'Clientes',
     'clients.name': 'Nombre',
@@ -106,7 +105,7 @@ export const translations = {
     'clients.add': 'Añadir Cliente',
     'clients.edit': 'Editar Cliente',
     'clients.delete': 'Eliminar Cliente',
-    
+
     // Inventory
     'inventory.title': 'Inventario',
     'inventory.name': 'Nombre',
@@ -116,7 +115,7 @@ export const translations = {
     'inventory.add': 'Añadir Artículo',
     'inventory.edit': 'Editar Artículo',
     'inventory.delete': 'Eliminar Artículo',
-    
+
     // Reservations
     'reservations.title': 'Reservas',
     'reservations.client': 'Cliente',
@@ -126,7 +125,7 @@ export const translations = {
     'reservations.add': 'Añadir Reserva',
     'reservations.edit': 'Editar Reserva',
     'reservations.delete': 'Eliminar Reserva',
-    
+
     // Bills
     'bills.title': 'Facturas',
     'bills.client': 'Cliente',
@@ -136,7 +135,7 @@ export const translations = {
     'bills.add': 'Añadir Factura',
     'bills.edit': 'Editar Factura',
     'bills.delete': 'Eliminar Factura',
-    
+
     // Common
     'common.save': 'Guardar',
     'common.cancel': 'Cancelar',

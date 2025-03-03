@@ -1,3 +1,4 @@
+
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,13 +23,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2 } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext"; // Added import
-import LanguageSelector from "@/components/LanguageSelector"; // Added import
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
-  const { t } = useLanguage(); // Added language context
+  const { t } = useLanguage();
 
   if (user) {
     navigate("/");
@@ -51,52 +52,69 @@ export default function AuthPage() {
     },
   });
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="w-full max-w-4xl mx-4 grid gap-8 md:grid-cols-2">
-        <div className="flex flex-col justify-center">
-          <div className="flex items-center gap-2 mb-4">
-            <img src="/APP.png" alt="Company Logo" className="h-10 w-auto" />
-          </div>
-          <p className="text-lg text-muted-foreground">
-            A comprehensive business management system for your company.
-            Manage clients, inventory, reservations, and billing all in one place.
-          </p>
-        </div>
+  const onLogin = loginForm.handleSubmit(async (data) => {
+    try {
+      await loginMutation.mutateAsync(data);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
+  });
 
+  const onRegister = registerForm.handleSubmit(async (data) => {
+    try {
+      await registerMutation.mutateAsync(data);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+  return (
+    <div className="container relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+      <div className="relative h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
+        <div className="absolute inset-0 bg-zinc-900" />
+        <div className="relative z-20 flex items-center text-lg font-medium">
+          <Building2 className="mr-2 h-6 w-6" />
+          {t('appName')}
+        </div>
+        <div className="relative z-20 mt-auto">
+          <blockquote className="space-y-2">
+            <p className="text-lg">
+              {t('auth.quote')}
+            </p>
+            <footer className="text-sm">{t('auth.quoteAuthor')}</footer>
+          </blockquote>
+        </div>
+      </div>
+      <div className="lg:p-8">
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle>{t('auth.welcome')}</CardTitle> {/* Replaced "Welcome" */}
-              <CardDescription>{t('auth.loginOrRegister')}</CardDescription> {/* Replaced description */}
+              <div>
+                <CardTitle>{t('auth.welcome')}</CardTitle>
+                <CardDescription>{t('auth.loginOrRegister')}</CardDescription>
+              </div>
+              <LanguageSelector />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="mt-4 flex justify-center">
-              <LanguageSelector />
-            </div>
             <Tabs defaultValue="login">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">{t('auth.login')}</TabsTrigger> {/* Replaced "Login" */}
-                <TabsTrigger value="register">{t('auth.register')}</TabsTrigger> {/* Replaced "Register" */}
+                <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
+                <TabsTrigger value="register">{t('auth.register')}</TabsTrigger>
               </TabsList>
-
               <TabsContent value="login">
                 <Form {...loginForm}>
-                  <form
-                    onSubmit={loginForm.handleSubmit((data) =>
-                      loginMutation.mutate(data)
-                    )}
-                    className="space-y-4"
-                  >
+                  <form onSubmit={onLogin} className="space-y-4">
                     <FormField
                       control={loginForm.control}
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.username')}</FormLabel> {/* Replaced "Username" */}
+                          <FormLabel>{t('auth.username')}</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('auth.enterUsername')} {...field} /> {/* Replaced placeholder */}
+                            <Input placeholder={t('auth.usernamePlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -107,43 +125,31 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.password')}</FormLabel> {/* Replaced "Password" */}
+                          <FormLabel>{t('auth.password')}</FormLabel>
                           <FormControl>
-                            <Input
-                              type="password"
-                              placeholder={t('auth.enterPassword')} {...field} /> {/* Replaced placeholder */}
+                            <Input type="password" placeholder={t('auth.passwordPlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={loginMutation.isPending}
-                    >
-                      {loginMutation.isPending ? t('auth.loggingIn') : t('auth.login')} {/* Replaced text */}
+                    <Button type="submit" className="w-full">
+                      {t('auth.loginButton')}
                     </Button>
                   </form>
                 </Form>
               </TabsContent>
-
               <TabsContent value="register">
                 <Form {...registerForm}>
-                  <form
-                    onSubmit={registerForm.handleSubmit((data) =>
-                      registerMutation.mutate(data)
-                    )}
-                    className="space-y-4"
-                  >
+                  <form onSubmit={onRegister} className="space-y-4">
                     <FormField
                       control={registerForm.control}
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.username')}</FormLabel> {/* Replaced "Username" */}
+                          <FormLabel>{t('auth.username')}</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('auth.chooseUsername')} {...field} /> {/* Replaced placeholder */}
+                            <Input placeholder={t('auth.usernamePlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -154,24 +160,16 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.password')}</FormLabel> {/* Replaced "Password" */}
+                          <FormLabel>{t('auth.password')}</FormLabel>
                           <FormControl>
-                            <Input
-                              type="password"
-                              placeholder={t('auth.choosePassword')} {...field} /> {/* Replaced placeholder */}
+                            <Input type="password" placeholder={t('auth.passwordPlaceholder')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={registerMutation.isPending}
-                    >
-                      {registerMutation.isPending
-                        ? t('auth.creatingAccount')
-                        : t('auth.createAccount')} {/* Replaced text */}
+                    <Button type="submit" className="w-full">
+                      {t('auth.registerButton')}
                     </Button>
                   </form>
                 </Form>
