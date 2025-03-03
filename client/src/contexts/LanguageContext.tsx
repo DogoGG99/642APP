@@ -1,89 +1,95 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Traducciones
+// Define translations
 const translations = {
   en: {
     auth: {
       welcome: 'Welcome',
-      loginOrRegister: 'Login or create an account',
+      loginOrRegister: 'Sign in to your account or create a new one',
       login: 'Login',
       register: 'Register',
-      email: 'Email',
-      emailPlaceholder: 'Enter your email',
+      username: 'Username',
       password: 'Password',
+      confirmPassword: 'Confirm Password',
+      usernamePlaceholder: 'Enter your username',
       passwordPlaceholder: 'Enter your password',
-      name: 'Name',
-      namePlaceholder: 'Enter your name',
-      submit: 'Submit',
-      loginSuccess: 'Login successful',
-      registerSuccess: 'Registration successful'
+      confirmPasswordPlaceholder: 'Confirm your password',
+      loginButton: 'Sign in',
+      registerButton: 'Create account'
+    },
+    validation: {
+      usernameMin: 'Username must be at least 3 characters',
+      passwordMin: 'Password must be at least 6 characters',
+      passwordsMatch: 'Passwords must match'
+    },
+    language: {
+      select: 'Language'
     },
     sidebar: {
       dashboard: 'Dashboard',
-      inventory: 'Inventory',
-      billing: 'Billing',
       settings: 'Settings',
       logout: 'Logout'
-    },
-    // Otras traducciones en inglés
+    }
   },
   es: {
     auth: {
       welcome: 'Bienvenido',
-      loginOrRegister: 'Inicia sesión o crea una cuenta',
-      login: 'Iniciar sesión',
+      loginOrRegister: 'Inicia sesión o crea una cuenta nueva',
+      login: 'Iniciar Sesión',
       register: 'Registrarse',
-      email: 'Correo electrónico',
-      emailPlaceholder: 'Ingresa tu correo electrónico',
+      username: 'Usuario',
       password: 'Contraseña',
+      confirmPassword: 'Confirmar Contraseña',
+      usernamePlaceholder: 'Ingresa tu usuario',
       passwordPlaceholder: 'Ingresa tu contraseña',
-      name: 'Nombre',
-      namePlaceholder: 'Ingresa tu nombre',
-      submit: 'Enviar',
-      loginSuccess: 'Inicio de sesión exitoso',
-      registerSuccess: 'Registro exitoso'
+      confirmPasswordPlaceholder: 'Confirma tu contraseña',
+      loginButton: 'Iniciar Sesión',
+      registerButton: 'Crear cuenta'
+    },
+    validation: {
+      usernameMin: 'El usuario debe tener al menos 3 caracteres',
+      passwordMin: 'La contraseña debe tener al menos 6 caracteres',
+      passwordsMatch: 'Las contraseñas deben coincidir'
+    },
+    language: {
+      select: 'Idioma'
     },
     sidebar: {
-      dashboard: 'Panel principal',
-      inventory: 'Inventario',
-      billing: 'Facturación',
+      dashboard: 'Panel',
       settings: 'Configuración',
-      logout: 'Cerrar sesión'
-    },
-    // Otras traducciones en español
+      logout: 'Cerrar Sesión'
+    }
   }
 };
 
 type Language = 'en' | 'es';
-type TranslationKey = keyof typeof translations.en | keyof typeof translations.es;
+type TranslationKey = keyof typeof translations.en;
 
 interface LanguageContextType {
   language: Language;
-  setLanguage: (language: Language) => void;
+  setLanguage: (lang: Language) => void;
   t: (key: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-interface LanguageProviderProps {
-  children: ReactNode;
-}
-
-export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>('en');
 
-  // Función para obtener traducción
-  const t = (key: string) => {
+  // Translation function
+  const t = (key: string): string => {
     const keys = key.split('.');
     let translation: any = translations[language];
-
+    
     for (const k of keys) {
       if (translation[k] === undefined) {
-        return key; // Devuelve la clave si no existe traducción
+        console.warn(`Translation key not found: ${key}`);
+        return key;
       }
       translation = translation[k];
     }
-
+    
     return translation;
   };
 
@@ -94,9 +100,9 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   );
 };
 
-export const useLanguage = () => {
+export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useLanguage must be used within a LanguageProvider');
   }
   return context;

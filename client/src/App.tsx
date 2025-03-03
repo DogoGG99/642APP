@@ -32,7 +32,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <LanguageProvider>
+        <LanguageProvider> {/* LanguageProvider added here */}
           <Router />
           <Toaster />
         </LanguageProvider>

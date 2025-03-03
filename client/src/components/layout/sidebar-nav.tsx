@@ -47,7 +47,7 @@ export default function SidebarNav() {
                   onClick={() => navigate(item.href)}
                 >
                   <Icon className="mr-2 h-4 w-4" />
-                  {item.name}
+                  {t(`nav.${item.name.toLowerCase()}`)}
                 </Button>
               );
             })}
@@ -61,9 +61,9 @@ export default function SidebarNav() {
           onClick={() => logoutMutation.mutate()}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          {t('nav.logout')} {/*This line is added to translate the logout button*/}
+          {t('nav.logout')}
         </Button>
-        <div className="mt-4 px-2"> {/*This div is added to include the LanguageSelector component*/}
+        <div className="mt-4 px-2">
           <LanguageSelector />
         </div>
       </div>
