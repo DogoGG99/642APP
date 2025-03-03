@@ -28,7 +28,7 @@ export default function SidebarNav() {
       <div className="space-y-4">
         <div className="px-3 py-2">
           <div className="mb-2 px-4 flex items-center gap-2">
-            <img src="/attached_assets/642_logo.png" alt="642 Logo" className="h-8 w-auto" />
+            <img src="/642_logo.png" alt="642 Logo" className="h-8 w-auto" />
             <h2 className="text-lg font-semibold tracking-tight">642APP</h2>
           </div>
           <div className="space-y-1">

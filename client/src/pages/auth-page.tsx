@@ -53,7 +53,7 @@ export default function AuthPage() {
       <div className="w-full max-w-4xl mx-4 grid gap-8 md:grid-cols-2">
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-4">
-            <img src="/attached_assets/642_logo.png" alt="642 Logo" className="h-10 w-auto" />
+            <img src="/642_logo.png" alt="642 Logo" className="h-10 w-auto" />
             <h1 className="text-3xl font-bold">642APP</h1>
           </div>
           <p className="text-lg text-muted-foreground">
