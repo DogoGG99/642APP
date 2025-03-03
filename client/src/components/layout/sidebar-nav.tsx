@@ -29,7 +29,6 @@ export default function SidebarNav() {
         <div className="px-3 py-2">
           <div className="mb-2 px-4 flex items-center gap-2">
             <img src="/APP.png" alt="Company Logo" className="h-8 w-auto" />
-            <h2 className="text-lg font-semibold tracking-tight">My Company</h2>
           </div>
           <div className="space-y-1">
             {navigation.map((item) => {
