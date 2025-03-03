@@ -88,7 +88,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/register", requireRole(['admin']), async (req, res, next) => {
+  app.post("/api/register", async (req, res, next) => {
     try {
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
@@ -98,7 +98,7 @@ export function setupAuth(app: Express) {
       const user = await storage.createUser({
         ...req.body,
         password: await hashPassword(req.body.password),
-        role: req.body.role || 'user'
+        role: 'user' // Always set new registrations to 'user' role
       });
 
       req.login(user, (err) => {
