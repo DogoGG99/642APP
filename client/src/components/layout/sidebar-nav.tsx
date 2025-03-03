@@ -27,9 +27,10 @@ export default function SidebarNav() {
     <div className="flex flex-col w-64 min-h-screen p-4 border-r border-border bg-sidebar">
       <div className="space-y-4">
         <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            642APP
-          </h2>
+          <div className="mb-2 px-4 flex items-center gap-2">
+            <img src="/attached_assets/642_logo.png" alt="642 Logo" className="h-8 w-auto" />
+            <h2 className="text-lg font-semibold tracking-tight">642APP</h2>
+          </div>
           <div className="space-y-1">
             {navigation.map((item) => {
               const Icon = item.icon;
