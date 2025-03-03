@@ -22,13 +22,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2 } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext"; // Added import
-import LanguageSelector from "@/components/LanguageSelector"; // Added import
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
-  const { t } = useLanguage(); // Added language context
+  const { t } = useLanguage();
 
   if (user) {
     navigate("/");
@@ -66,17 +66,17 @@ export default function AuthPage() {
 
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center"> {/* Added div for LanguageSelector */}
-              <CardTitle>{t('auth.welcome')}</CardTitle> {/* Replaced "Welcome" */}
-              <CardDescription>{t('auth.loginOrRegister')}</CardDescription> {/* Replaced description */}
-              <LanguageSelector /> {/* Added Language Selector */}
+            <div className="flex justify-between items-center">
+              <CardTitle>{t('auth.welcome')}</CardTitle>
+              <CardDescription>{t('auth.loginOrRegister')}</CardDescription>
+              <LanguageSelector />
             </div>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">{t('auth.login')}</TabsTrigger> {/* Replaced "Login" */}
-                <TabsTrigger value="register">{t('auth.register')}</TabsTrigger> {/* Replaced "Register" */}
+                <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
+                <TabsTrigger value="register">{t('auth.register')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
@@ -92,9 +92,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.username')}</FormLabel> {/* Replaced "Username" */}
+                          <FormLabel>{t('auth.username')}</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('auth.enterUsername')} {...field} /> {/* Replaced placeholder */}
+                            <Input placeholder={t('auth.enterUsername')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -105,22 +105,16 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.password')}</FormLabel> {/* Replaced "Password" */}
+                          <FormLabel>{t('auth.password')}</FormLabel>
                           <FormControl>
-                            <Input
-                              type="password"
-                              placeholder={t('auth.enterPassword')} {...field} /> {/* Replaced placeholder */}
+                            <Input type="password" placeholder={t('auth.enterPassword')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={loginMutation.isPending}
-                    >
-                      {loginMutation.isPending ? t('auth.loggingIn') : t('auth.login')} {/* Replaced text */}
+                    <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+                      {loginMutation.isPending ? t('auth.loggingIn') : t('auth.login')}
                     </Button>
                   </form>
                 </Form>
@@ -139,9 +133,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.username')}</FormLabel> {/* Replaced "Username" */}
+                          <FormLabel>{t('auth.username')}</FormLabel>
                           <FormControl>
-                            <Input placeholder={t('auth.chooseUsername')} {...field} /> {/* Replaced placeholder */}
+                            <Input placeholder={t('auth.chooseUsername')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -152,24 +146,16 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.password')}</FormLabel> {/* Replaced "Password" */}
+                          <FormLabel>{t('auth.password')}</FormLabel>
                           <FormControl>
-                            <Input
-                              type="password"
-                              placeholder={t('auth.choosePassword')} {...field} /> {/* Replaced placeholder */}
+                            <Input type="password" placeholder={t('auth.choosePassword')} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={registerMutation.isPending}
-                    >
-                      {registerMutation.isPending
-                        ? t('auth.creatingAccount')
-                        : t('auth.createAccount')} {/* Replaced text */}
+                    <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
+                      {registerMutation.isPending ? t('auth.creatingAccount') : t('auth.createAccount')}
                     </Button>
                   </form>
                 </Form>

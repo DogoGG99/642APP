@@ -3,26 +3,18 @@ import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export const LanguageSelector: React.FC = () => {
-  const { language, setLanguage, t } = useLanguage();
+export function LanguageSelector() {
+  const { language, setLanguage } = useLanguage();
 
   return (
-    <div className="flex items-center space-x-2">
-      <span className="text-sm text-muted-foreground">{t('common.language')}:</span>
-      <Select
-        value={language}
-        onValueChange={(value) => setLanguage(value as 'en' | 'es')}
-      >
-        <SelectTrigger className="w-[100px] h-8">
-          <SelectValue placeholder={language === 'en' ? 'English' : 'Español'} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="en">English</SelectItem>
-          <SelectItem value="es">Español</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
+    <Select value={language} onValueChange={setLanguage}>
+      <SelectTrigger className="w-[120px]">
+        <SelectValue placeholder="Idioma" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="es">Español</SelectItem>
+        <SelectItem value="en">English</SelectItem>
+      </SelectContent>
+    </Select>
   );
-};
-
-export default LanguageSelector;
+}

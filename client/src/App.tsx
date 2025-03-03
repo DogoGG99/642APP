@@ -31,12 +31,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <LanguageProvider> {/* Added LanguageProvider */}
-        <AuthProvider>
+      <AuthProvider>
+        <LanguageProvider>
           <Router />
           <Toaster />
-        </AuthProvider>
-      </LanguageProvider> {/* Added LanguageProvider */}
+        </LanguageProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
