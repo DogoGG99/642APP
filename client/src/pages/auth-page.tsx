@@ -66,13 +66,15 @@ export default function AuthPage() {
 
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center"> {/* Added div for LanguageSelector */}
+            <div className="flex justify-between items-center">
               <CardTitle>{t('auth.welcome')}</CardTitle> {/* Replaced "Welcome" */}
               <CardDescription>{t('auth.loginOrRegister')}</CardDescription> {/* Replaced description */}
-              <LanguageSelector /> {/* Added Language Selector */}
             </div>
           </CardHeader>
           <CardContent>
+            <div className="mt-4 flex justify-center">
+              <LanguageSelector />
+            </div>
             <Tabs defaultValue="login">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">{t('auth.login')}</TabsTrigger> {/* Replaced "Login" */}
