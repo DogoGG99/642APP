@@ -1,13 +1,16 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useAuth } from "@/hooks/use-auth";
-import { useLanguage } from "@/contexts/LanguageContext"; // Importar contexto de idioma
-import { LanguageSelector } from "@/components/LanguageSelector"; // Importar selector de idioma
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocation } from "wouter";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { insertUserSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -17,23 +20,23 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-const loginSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-});
-
-const registerSchema = z.object({
-  username: z.string().min(3),
-  password: z.string().min(6),
-});
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Building2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext"; // Added import
+import LanguageSelector from "@/components/LanguageSelector"; // Added import
 
 export default function AuthPage() {
-  const { login, register } = useAuth();
-  const { t } = useLanguage(); // Usar el hook de traducción
+  const { user, loginMutation, registerMutation } = useAuth();
+  const [, navigate] = useLocation();
+  const { t } = useLanguage(); // Added language context
+
+  if (user) {
+    navigate("/");
+    return null;
+  }
 
   const loginForm = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(insertUserSchema),
     defaultValues: {
       username: "",
       password: "",
@@ -41,51 +44,57 @@ export default function AuthPage() {
   });
 
   const registerForm = useForm({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(insertUserSchema),
     defaultValues: {
       username: "",
       password: "",
     },
   });
 
-  function onLoginSubmit(values: z.infer<typeof loginSchema>) {
-    login(values);
-  }
-
-  function onRegisterSubmit(values: z.infer<typeof registerSchema>) {
-    register(values);
-  }
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-4">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="w-full max-w-4xl mx-4 grid gap-8 md:grid-cols-2">
+        <div className="flex flex-col justify-center">
+          <div className="flex items-center gap-2 mb-4">
+            <img src="/APP.png" alt="Company Logo" className="h-10 w-auto" />
+          </div>
+          <p className="text-lg text-muted-foreground">
+            A comprehensive business management system for your company.
+            Manage clients, inventory, reservations, and billing all in one place.
+          </p>
+        </div>
+
         <Card>
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <div>
-                <CardTitle>{t('auth.welcome')}</CardTitle>
-                <CardDescription>{t('auth.loginOrRegister')}</CardDescription>
-              </div>
-              <LanguageSelector />
+            <div className="flex justify-between items-center"> {/* Added div for LanguageSelector */}
+              <CardTitle>{t('auth.welcome')}</CardTitle> {/* Replaced "Welcome" */}
+              <CardDescription>{t('auth.loginOrRegister')}</CardDescription> {/* Replaced description */}
+              <LanguageSelector /> {/* Added Language Selector */}
             </div>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">{t('auth.login')}</TabsTrigger>
-                <TabsTrigger value="register">{t('auth.register')}</TabsTrigger>
+                <TabsTrigger value="login">{t('auth.login')}</TabsTrigger> {/* Replaced "Login" */}
+                <TabsTrigger value="register">{t('auth.register')}</TabsTrigger> {/* Replaced "Register" */}
               </TabsList>
+
               <TabsContent value="login">
                 <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                  <form
+                    onSubmit={loginForm.handleSubmit((data) =>
+                      loginMutation.mutate(data)
+                    )}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={loginForm.control}
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.username')}</FormLabel>
+                          <FormLabel>{t('auth.username')}</FormLabel> {/* Replaced "Username" */}
                           <FormControl>
-                            <Input placeholder={t('auth.usernamePlaceholder')} {...field} />
+                            <Input placeholder={t('auth.enterUsername')} {...field} /> {/* Replaced placeholder */}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -96,29 +105,43 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.password')}</FormLabel>
+                          <FormLabel>{t('auth.password')}</FormLabel> {/* Replaced "Password" */}
                           <FormControl>
-                            <Input type="password" placeholder={t('auth.passwordPlaceholder')} {...field} />
+                            <Input
+                              type="password"
+                              placeholder={t('auth.enterPassword')} {...field} /> {/* Replaced placeholder */}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full">{t('auth.login')}</Button>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={loginMutation.isPending}
+                    >
+                      {loginMutation.isPending ? t('auth.loggingIn') : t('auth.login')} {/* Replaced text */}
+                    </Button>
                   </form>
                 </Form>
               </TabsContent>
+
               <TabsContent value="register">
                 <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                  <form
+                    onSubmit={registerForm.handleSubmit((data) =>
+                      registerMutation.mutate(data)
+                    )}
+                    className="space-y-4"
+                  >
                     <FormField
                       control={registerForm.control}
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.username')}</FormLabel>
+                          <FormLabel>{t('auth.username')}</FormLabel> {/* Replaced "Username" */}
                           <FormControl>
-                            <Input placeholder={t('auth.usernamePlaceholder')} {...field} />
+                            <Input placeholder={t('auth.chooseUsername')} {...field} /> {/* Replaced placeholder */}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -129,15 +152,25 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('auth.password')}</FormLabel>
+                          <FormLabel>{t('auth.password')}</FormLabel> {/* Replaced "Password" */}
                           <FormControl>
-                            <Input type="password" placeholder={t('auth.passwordPlaceholder')} {...field} />
+                            <Input
+                              type="password"
+                              placeholder={t('auth.choosePassword')} {...field} /> {/* Replaced placeholder */}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <Button type="submit" className="w-full">{t('auth.register')}</Button>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={registerMutation.isPending}
+                    >
+                      {registerMutation.isPending
+                        ? t('auth.creatingAccount')
+                        : t('auth.createAccount')} {/* Replaced text */}
+                    </Button>
                   </form>
                 </Form>
               </TabsContent>
