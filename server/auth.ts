@@ -13,6 +13,14 @@ declare global {
   }
 }
 
+// Middleware to check user role
+export const requireRole = (roles: string[]) => (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user || !roles.includes(req.user.role)) {
+    return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+  }
+  next();
+};
+
 const scryptAsync = promisify(scrypt);
 
 async function hashPassword(password: string) {

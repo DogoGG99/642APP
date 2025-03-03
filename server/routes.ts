@@ -1,21 +1,12 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth } from "./auth";
+import { setupAuth, requireRole } from "./auth";
 import { insertClientSchema, insertInventorySchema, insertReservationSchema, insertBillSchema } from "@shared/schema";
 
 // Middleware to check if user is authenticated
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   if (!req.isAuthenticated()) {
-
-// Middleware to check user role
-const requireRole = (roles: string[]) => (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user || !roles.includes(req.user.role)) {
-    return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
-  }
-  next();
-};
-
     return res.status(401).json({ message: "Unauthorized" });
   }
   next();
