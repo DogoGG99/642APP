@@ -17,6 +17,7 @@ export function ProtectedRoute({
       <Route path={path}>
         <div className="flex items-center justify-center min-h-screen">
           <Loader2 className="h-8 w-8 animate-spin text-border" />
+          <span className="ml-2">Cargando...</span>
         </div>
       </Route>
     );

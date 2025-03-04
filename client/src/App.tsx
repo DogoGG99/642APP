@@ -17,10 +17,10 @@ function Router() {
   return (
     <Switch>
       <ProtectedRoute path="/" component={DashboardPage} />
-      <ProtectedRoute path="/clients" component={ClientsPage} />
-      <ProtectedRoute path="/inventory" component={InventoryPage} />
-      <ProtectedRoute path="/reservations" component={ReservationsPage} />
-      <ProtectedRoute path="/billing" component={BillingPage} />
+      <ProtectedRoute path="/clientes" component={ClientsPage} />
+      <ProtectedRoute path="/inventario" component={InventoryPage} />
+      <ProtectedRoute path="/reservas" component={ReservationsPage} />
+      <ProtectedRoute path="/facturacion" component={BillingPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

@@ -12,11 +12,11 @@ import {
 } from "lucide-react";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Clients", href: "/clients", icon: Users },
-  { name: "Inventory", href: "/inventory", icon: Package },
-  { name: "Reservations", href: "/reservations", icon: Calendar },
-  { name: "Billing", href: "/billing", icon: Receipt },
+  { name: "Panel", href: "/", icon: LayoutDashboard },
+  { name: "Clientes", href: "/clientes", icon: Users },
+  { name: "Inventario", href: "/inventario", icon: Package },
+  { name: "Reservas", href: "/reservas", icon: Calendar },
+  { name: "Facturación", href: "/facturacion", icon: Receipt },
 ];
 
 export default function SidebarNav() {
@@ -28,7 +28,7 @@ export default function SidebarNav() {
       <div className="space-y-4">
         <div className="px-3 py-2">
           <div className="mb-2 px-4 flex items-center gap-2">
-            <img src="/APP.png" alt="Company Logo" className="h-8 w-auto" />
+            <img src="/APP.png" alt="Logo de la Empresa" className="h-8 w-auto" />
           </div>
           <div className="space-y-1">
             {navigation.map((item) => {
@@ -58,7 +58,7 @@ export default function SidebarNav() {
           onClick={() => logoutMutation.mutate()}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          Logout
+          Cerrar Sesión
         </Button>
       </div>
     </div>

@@ -35,7 +35,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 export default function InventoryPage() {
-  const { user } = useAuth(); // Add auth context
+  const { user } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Inventory | null>(null);
@@ -52,15 +52,15 @@ export default function InventoryPage() {
 
   const { data: inventory, isLoading } = useQuery<Inventory[]>({
     queryKey: ["/api/inventory"],
-    enabled: !!user, // Only fetch when user is authenticated
+    enabled: !!user,
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertInventory) => {
-      const res = await apiRequest("POST", "/api/inventory", data, { credentials: 'include' });
+      const res = await apiRequest("POST", "/api/inventory", data);
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Failed to create item");
+        throw new Error(error.message || "Error al crear el artículo");
       }
       return res.json();
     },
@@ -69,15 +69,15 @@ export default function InventoryPage() {
       setIsOpen(false);
       form.reset();
       toast({
-        title: "Success",
-        description: "Inventory item created successfully",
+        title: "Éxito",
+        description: "Artículo creado exitosamente",
       });
     },
     onError: (error: Error) => {
       if (error.message.includes("401")) {
         toast({
           title: "Error",
-          description: "Please log in to add inventory items",
+          description: "Por favor inicia sesión para agregar artículos",
           variant: "destructive",
         });
       } else {
@@ -95,7 +95,7 @@ export default function InventoryPage() {
       const res = await apiRequest("PATCH", `/api/inventory/${id}`, data);
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Failed to update item");
+        throw new Error(error.message || "Error al actualizar el artículo");
       }
       return res.json();
     },
@@ -105,15 +105,15 @@ export default function InventoryPage() {
       setEditingItem(null);
       form.reset();
       toast({
-        title: "Success",
-        description: "Inventory item updated successfully",
+        title: "Éxito",
+        description: "Artículo actualizado exitosamente",
       });
     },
     onError: (error: Error) => {
       if (error.message.includes("401")) {
         toast({
           title: "Error",
-          description: "Please log in to update inventory items",
+          description: "Por favor inicia sesión para actualizar artículos",
           variant: "destructive",
         });
       } else {
@@ -131,21 +131,21 @@ export default function InventoryPage() {
       const res = await apiRequest("DELETE", `/api/inventory/${id}`);
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Failed to delete item");
+        throw new Error(error.message || "Error al eliminar el artículo");
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
       toast({
-        title: "Success",
-        description: "Inventory item deleted successfully",
+        title: "Éxito",
+        description: "Artículo eliminado exitosamente",
       });
     },
     onError: (error: Error) => {
       if (error.message.includes("401")) {
         toast({
           title: "Error",
-          description: "Please log in to delete inventory items",
+          description: "Por favor inicia sesión para eliminar artículos",
           variant: "destructive",
         });
       } else {
@@ -162,27 +162,22 @@ export default function InventoryPage() {
     if (!user) {
       toast({
         title: "Error",
-        description: "Please log in to manage inventory",
+        description: "Por favor inicia sesión para gestionar el inventario",
         variant: "destructive",
       });
       return;
     }
 
-    // Ensure numeric fields are properly converted
     const formattedData = {
       ...data,
       quantity: Number(data.quantity),
       price: Number(data.price),
     };
 
-    try {
-      if (editingItem) {
-        updateMutation.mutate({ id: editingItem.id, data: formattedData });
-      } else {
-        createMutation.mutate(formattedData);
-      }
-    } catch (error) {
-      console.error('Mutation error:', error);
+    if (editingItem) {
+      updateMutation.mutate({ id: editingItem.id, data: formattedData });
+    } else {
+      createMutation.mutate(formattedData);
     }
   }
 
@@ -190,9 +185,9 @@ export default function InventoryPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Inventory</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Inventario</h2>
           <p className="text-muted-foreground">
-            Manage your inventory items here.
+            Gestiona tus artículos de inventario aquí.
           </p>
         </div>
 
@@ -200,13 +195,13 @@ export default function InventoryPage() {
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add Item
+              Agregar Artículo
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {editingItem ? "Edit Item" : "Add New Item"}
+                {editingItem ? "Editar Artículo" : "Agregar Nuevo Artículo"}
               </DialogTitle>
             </DialogHeader>
             <Form {...form}>
@@ -216,9 +211,9 @@ export default function InventoryPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>Nombre</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter item name" {...field} />
+                        <Input placeholder="Ingrese el nombre del artículo" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -229,10 +224,10 @@ export default function InventoryPage() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Descripción</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Enter item description"
+                          placeholder="Ingrese la descripción del artículo"
                           {...field}
                           value={field.value || ""}
                         />
@@ -246,11 +241,11 @@ export default function InventoryPage() {
                   name="quantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Quantity</FormLabel>
+                      <FormLabel>Cantidad</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="Enter quantity"
+                          placeholder="Ingrese la cantidad"
                           {...field}
                           onChange={(e) =>
                             field.onChange(parseInt(e.target.value) || 0)
@@ -266,12 +261,12 @@ export default function InventoryPage() {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price</FormLabel>
+                      <FormLabel>Precio</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           step="0.01"
-                          placeholder="Enter price"
+                          placeholder="Ingrese el precio"
                           {...field}
                           onChange={(e) =>
                             field.onChange(parseFloat(e.target.value) || 0)
@@ -288,8 +283,8 @@ export default function InventoryPage() {
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending
-                    ? "Saving..."
-                    : "Save Item"}
+                    ? "Guardando..."
+                    : "Guardar Artículo"}
                 </Button>
               </form>
             </Form>
@@ -301,11 +296,11 @@ export default function InventoryPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Descripción</TableHead>
+              <TableHead>Cantidad</TableHead>
+              <TableHead>Precio</TableHead>
+              <TableHead className="w-[100px]">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -338,7 +333,7 @@ export default function InventoryPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          if (confirm("Are you sure you want to delete this item?")) {
+                          if (confirm("¿Estás seguro de que quieres eliminar este artículo?")) {
                             deleteMutation.mutate(item.id);
                           }
                         }}

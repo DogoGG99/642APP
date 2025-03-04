@@ -40,13 +40,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
+        title: "¡Bienvenido de nuevo!",
+        description: "Has iniciado sesión exitosamente.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Login failed",
+        title: "Error de inicio de sesión",
         description: error.message,
         variant: "destructive",
       });
@@ -61,13 +61,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
       toast({
-        title: "Welcome!",
-        description: "Your account has been created successfully.",
+        title: "¡Bienvenido!",
+        description: "Tu cuenta ha sido creada exitosamente.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Registration failed",
+        title: "Error de registro",
         description: error.message,
         variant: "destructive",
       });
@@ -81,13 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
       toast({
-        title: "Goodbye!",
-        description: "You have been logged out successfully.",
+        title: "¡Hasta pronto!",
+        description: "Has cerrado sesión exitosamente.",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Logout failed",
+        title: "Error al cerrar sesión",
         description: error.message,
         variant: "destructive",
       });

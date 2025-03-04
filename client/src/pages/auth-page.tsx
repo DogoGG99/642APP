@@ -53,26 +53,26 @@ export default function AuthPage() {
       <div className="w-full max-w-4xl mx-4 grid gap-8 md:grid-cols-2">
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-4">
-            <img src="/APP.png" alt="Company Logo" className="h-10 w-auto" />
+            <img src="/APP.png" alt="Logo de la Empresa" className="h-10 w-auto" />
           </div>
           <p className="text-lg text-muted-foreground">
-            A comprehensive business management system for your company.
-            Manage clients, inventory, reservations, and billing all in one place.
+            Un sistema integral de gestión empresarial para tu compañía.
+            Gestiona clientes, inventario, reservas y facturación en un solo lugar.
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Welcome</CardTitle>
+            <CardTitle>Bienvenido</CardTitle>
             <CardDescription>
-              Login or create an account to continue.
+              Inicia sesión o crea una cuenta para continuar.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
+                <TabsTrigger value="login">Iniciar Sesión</TabsTrigger>
+                <TabsTrigger value="register">Registrarse</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
@@ -88,9 +88,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Username</FormLabel>
+                          <FormLabel>Usuario</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter username" {...field} />
+                            <Input placeholder="Ingresa tu usuario" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -101,11 +101,11 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Password</FormLabel>
+                          <FormLabel>Contraseña</FormLabel>
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="Enter password"
+                              placeholder="Ingresa tu contraseña"
                               {...field}
                             />
                           </FormControl>
@@ -118,7 +118,7 @@ export default function AuthPage() {
                       className="w-full"
                       disabled={loginMutation.isPending}
                     >
-                      {loginMutation.isPending ? "Logging in..." : "Login"}
+                      {loginMutation.isPending ? "Iniciando sesión..." : "Iniciar Sesión"}
                     </Button>
                   </form>
                 </Form>
@@ -137,9 +137,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Username</FormLabel>
+                          <FormLabel>Usuario</FormLabel>
                           <FormControl>
-                            <Input placeholder="Choose username" {...field} />
+                            <Input placeholder="Elige un usuario" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -150,11 +150,11 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Password</FormLabel>
+                          <FormLabel>Contraseña</FormLabel>
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="Choose password"
+                              placeholder="Elige una contraseña"
                               {...field}
                             />
                           </FormControl>
@@ -168,8 +168,8 @@ export default function AuthPage() {
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending
-                        ? "Creating account..."
-                        : "Create Account"}
+                        ? "Creando cuenta..."
+                        : "Crear Cuenta"}
                     </Button>
                   </form>
                 </Form>

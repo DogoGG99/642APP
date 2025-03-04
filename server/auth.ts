@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
@@ -47,8 +47,9 @@ export function setupAuth(app: Express) {
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       httpOnly: true,
+      path: "/",
     },
-    name: "sid", // Change session cookie name from default 'connect.sid'
+    name: "sid",
   };
 
   // Trust first proxy if in production
@@ -56,7 +57,6 @@ export function setupAuth(app: Express) {
     app.set("trust proxy", 1);
   }
 
-  // Session middleware must come before passport
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
@@ -66,7 +66,7 @@ export function setupAuth(app: Express) {
       try {
         const user = await storage.getUserByUsername(username);
         if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false);
+          return done(null, false, { message: "Usuario o contraseña incorrectos" });
         }
         return done(null, user);
       } catch (err) {
@@ -75,7 +75,10 @@ export function setupAuth(app: Express) {
     })
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    done(null, user.id);
+  });
+
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);
@@ -92,13 +95,13 @@ export function setupAuth(app: Express) {
     try {
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
-        return res.status(400).json({ message: "Username already exists" });
+        return res.status(400).json({ message: "El usuario ya existe" });
       }
 
       const user = await storage.createUser({
         ...req.body,
         password: await hashPassword(req.body.password),
-        role: 'user' // Always set new registrations to 'user' role
+        role: 'user'
       });
 
       req.login(user, (err) => {
@@ -110,8 +113,17 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json(req.user);
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) return next(err);
+      if (!user) {
+        return res.status(401).json({ message: info?.message || "Usuario o contraseña incorrectos" });
+      }
+      req.login(user, (err) => {
+        if (err) return next(err);
+        res.json(user);
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
@@ -119,14 +131,16 @@ export function setupAuth(app: Express) {
       if (err) return next(err);
       req.session.destroy((err) => {
         if (err) return next(err);
-        res.clearCookie("sid");
+        res.clearCookie("sid", { path: "/" });
         res.sendStatus(200);
       });
     });
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "No autorizado" });
+    }
     res.json(req.user);
   });
 }
