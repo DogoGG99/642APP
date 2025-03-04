@@ -10,7 +10,6 @@ import {
   Receipt,
   LogOut,
 } from "lucide-react";
-import { LanguageSelector } from "../LanguageSelector"; // Added import
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -53,7 +52,6 @@ export default function SidebarNav() {
         </div>
       </div>
       <div className="mt-auto">
-        <LanguageSelector /> {/* Added LanguageSelector */}
         <Button
           variant="ghost"
           className="w-full justify-start"
