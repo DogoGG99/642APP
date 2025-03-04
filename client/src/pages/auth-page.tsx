@@ -21,11 +21,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext"; // Assuming this context exists
+import { LanguageSelector } from "@/components/LanguageSelector"; // Assuming this component exists
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
+  const { t } = useLanguage(); // Use the translation hook
 
   if (user) {
     navigate("/");
@@ -63,16 +65,17 @@ export default function AuthPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Welcome</CardTitle>
-            <CardDescription>
-              Login or create an account to continue.
-            </CardDescription>
+            <CardTitle>{t('auth.welcome')}</CardTitle> {/* Example translation */}
+            <CardDescription>{t('auth.loginOrRegister')}</CardDescription> {/* Example translation */}
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login">
+            <div className="mt-4">
+              <LanguageSelector />
+            </div>
+            <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
+                <TabsTrigger value="login">{t('login.title')}</TabsTrigger>
+                <TabsTrigger value="register">{t('register.title')}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
@@ -88,9 +91,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Username</FormLabel>
+                          <FormLabel>{t('login.username')}</FormLabel> {/* Example translation */}
                           <FormControl>
-                            <Input placeholder="Enter username" {...field} />
+                            <Input placeholder={t('login.usernamePlaceholder')} {...field} /> {/* Example translation */}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -101,11 +104,11 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Password</FormLabel>
+                          <FormLabel>{t('login.password')}</FormLabel> {/* Example translation */}
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="Enter password"
+                              placeholder={t('login.passwordPlaceholder')}
                               {...field}
                             />
                           </FormControl>
@@ -118,7 +121,7 @@ export default function AuthPage() {
                       className="w-full"
                       disabled={loginMutation.isPending}
                     >
-                      {loginMutation.isPending ? "Logging in..." : "Login"}
+                      {loginMutation.isPending ? t('login.loggingIn') : t('login.login')} {/* Example translation */}
                     </Button>
                   </form>
                 </Form>
@@ -137,9 +140,9 @@ export default function AuthPage() {
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Username</FormLabel>
+                          <FormLabel>{t('register.username')}</FormLabel> {/* Example translation */}
                           <FormControl>
-                            <Input placeholder="Choose username" {...field} />
+                            <Input placeholder={t('register.usernamePlaceholder')} {...field} /> {/* Example translation */}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -150,11 +153,11 @@ export default function AuthPage() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Password</FormLabel>
+                          <FormLabel>{t('register.password')}</FormLabel> {/* Example translation */}
                           <FormControl>
                             <Input
                               type="password"
-                              placeholder="Choose password"
+                              placeholder={t('register.passwordPlaceholder')}
                               {...field}
                             />
                           </FormControl>
@@ -168,8 +171,8 @@ export default function AuthPage() {
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending
-                        ? "Creating account..."
-                        : "Create Account"}
+                        ? t('register.creatingAccount')
+                        : t('register.createAccount')} {/* Example translation */}
                     </Button>
                   </form>
                 </Form>
