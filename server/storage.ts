@@ -1,23 +1,26 @@
 import session from "express-session";
 import connectPg from "connect-pg-simple";
-import { db, pool } from "./db"; // Added pool import
-import { eq } from "drizzle-orm";
+import { db, pool } from "./db";
+import { eq, and, isNull } from "drizzle-orm";
 import {
   users,
   clients,
   inventory,
   reservations,
   bills,
+  shifts,
   type User,
   type Client,
   type Inventory,
   type Reservation,
   type Bill,
+  type Shift,
   type InsertUser,
   type InsertClient,
   type InsertInventory,
   type InsertReservation,
   type InsertBill,
+  type InsertShift,
 } from "@shared/schema";
 
 const PostgresSessionStore = connectPg(session);
@@ -56,6 +59,11 @@ export interface IStorage {
   updateBill(id: number, bill: Partial<InsertBill>): Promise<Bill>;
   deleteBill(id: number): Promise<void>;
 
+  // Shifts
+  getActiveShift(userId: number): Promise<Shift | undefined>;
+  createShift(shift: InsertShift): Promise<Shift>;
+  updateShift(id: number, shift: Partial<InsertShift>): Promise<Shift>;
+
   sessionStore: session.Store;
 }
 
@@ -63,7 +71,6 @@ export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    // Fix: Use the pool directly from db.ts
     this.sessionStore = new PostgresSessionStore({
       pool: pool,
       createTableIfMissing: true,
@@ -110,7 +117,7 @@ export class DatabaseStorage implements IStorage {
       .set(client)
       .where(eq(clients.id, id))
       .returning();
-    if (!updated) throw new Error("Client not found");
+    if (!updated) throw new Error("Cliente no encontrado");
     return updated;
   }
 
@@ -129,20 +136,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createInventoryItem(item: InsertInventory): Promise<Inventory> {
-    const [newItem] = await db.insert(inventory).values(item).returning();
+    const [newItem] = await db.insert(inventory).values({
+      ...item,
+      price: item.price.toString(),
+    }).returning();
     return newItem;
   }
 
-  async updateInventoryItem(
-    id: number,
-    item: Partial<InsertInventory>,
-  ): Promise<Inventory> {
+  async updateInventoryItem(id: number, item: Partial<InsertInventory>): Promise<Inventory> {
     const [updated] = await db
       .update(inventory)
-      .set(item)
+      .set({
+        ...item,
+        price: item.price?.toString(),
+      })
       .where(eq(inventory.id, id))
       .returning();
-    if (!updated) throw new Error("Inventory item not found");
+    if (!updated) throw new Error("Artículo no encontrado");
     return updated;
   }
 
@@ -171,16 +181,13 @@ export class DatabaseStorage implements IStorage {
     return newReservation;
   }
 
-  async updateReservation(
-    id: number,
-    reservation: Partial<InsertReservation>,
-  ): Promise<Reservation> {
+  async updateReservation(id: number, reservation: Partial<InsertReservation>): Promise<Reservation> {
     const [updated] = await db
       .update(reservations)
       .set(reservation)
       .where(eq(reservations.id, id))
       .returning();
-    if (!updated) throw new Error("Reservation not found");
+    if (!updated) throw new Error("Reserva no encontrada");
     return updated;
   }
 
@@ -199,22 +206,61 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createBill(bill: InsertBill): Promise<Bill> {
-    const [newBill] = await db.insert(bills).values(bill).returning();
+    const [newBill] = await db.insert(bills).values({
+      ...bill,
+      amount: bill.amount.toString(),
+    }).returning();
     return newBill;
   }
 
   async updateBill(id: number, bill: Partial<InsertBill>): Promise<Bill> {
     const [updated] = await db
       .update(bills)
-      .set(bill)
+      .set({
+        ...bill,
+        amount: bill.amount?.toString(),
+      })
       .where(eq(bills.id, id))
       .returning();
-    if (!updated) throw new Error("Bill not found");
+    if (!updated) throw new Error("Factura no encontrada");
     return updated;
   }
 
   async deleteBill(id: number): Promise<void> {
     await db.delete(bills).where(eq(bills.id, id));
+  }
+
+  // Shift methods
+  async getActiveShift(userId: number): Promise<Shift | undefined> {
+    const [activeShift] = await db
+      .select()
+      .from(shifts)
+      .where(
+        and(
+          eq(shifts.userId, userId),
+          eq(shifts.status, 'active'),
+          isNull(shifts.endTime)
+        )
+      );
+    return activeShift;
+  }
+
+  async createShift(shift: InsertShift): Promise<Shift> {
+    const [newShift] = await db
+      .insert(shifts)
+      .values(shift)
+      .returning();
+    return newShift;
+  }
+
+  async updateShift(id: number, shift: Partial<InsertShift>): Promise<Shift> {
+    const [updated] = await db
+      .update(shifts)
+      .set(shift)
+      .where(eq(shifts.id, id))
+      .returning();
+    if (!updated) throw new Error("Turno no encontrado");
+    return updated;
   }
 }
 
