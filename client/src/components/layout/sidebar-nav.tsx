@@ -8,11 +8,13 @@ import {
   Package,
   Calendar,
   Receipt,
+  Clock,
   LogOut,
 } from "lucide-react";
 
 const navigation = [
   { name: "Panel", href: "/", icon: LayoutDashboard },
+  { name: "Turnos", href: "/turnos", icon: Clock },
   { name: "Clientes", href: "/clientes", icon: Users },
   { name: "Inventario", href: "/inventario", icon: Package },
   { name: "Reservas", href: "/reservas", icon: Calendar },

@@ -8,6 +8,7 @@ import { ProtectedRoute } from "./lib/protected-route";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import DashboardPage from "@/pages/dashboard-page";
+import ShiftsPage from "@/pages/shifts-page";
 import ClientsPage from "@/pages/clients-page";
 import InventoryPage from "@/pages/inventory-page";
 import ReservationsPage from "@/pages/reservations-page";
@@ -17,6 +18,7 @@ function Router() {
   return (
     <Switch>
       <ProtectedRoute path="/" component={DashboardPage} />
+      <ProtectedRoute path="/turnos" component={ShiftsPage} />
       <ProtectedRoute path="/clientes" component={ClientsPage} />
       <ProtectedRoute path="/inventario" component={InventoryPage} />
       <ProtectedRoute path="/reservas" component={ReservationsPage} />

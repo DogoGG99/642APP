@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, requireRole } from "./auth";
 import { insertClientSchema, insertInventorySchema, insertReservationSchema, insertBillSchema } from "@shared/schema";
+import { insertShiftSchema } from "@shared/schema";
 
 // Middleware to check if user is authenticated
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
@@ -209,6 +210,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete bill" });
     }
   });
+
+  // Shift routes
+  app.get("/api/shifts/active", requireAuth, async (req, res) => {
+    try {
+      const activeShift = await storage.getActiveShift(req.user!.id);
+      res.json(activeShift);
+    } catch (err) {
+      console.error("Error fetching active shift:", err);
+      res.status(500).json({ message: "Error al obtener el turno activo" });
+    }
+  });
+
+  app.post("/api/shifts", requireAuth, async (req, res) => {
+    try {
+      const parsed = insertShiftSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ 
+          message: "Datos de turno inválidos",
+          errors: parsed.error.errors 
+        });
+      }
+
+      // Verificar si ya existe un turno activo
+      const activeShift = await storage.getActiveShift(req.user!.id);
+      if (activeShift) {
+        return res.status(400).json({ 
+          message: "Ya tienes un turno activo" 
+        });
+      }
+
+      const shift = await storage.createShift({
+        ...parsed.data,
+        userId: req.user!.id
+      });
+      res.status(201).json(shift);
+    } catch (err) {
+      console.error("Error creating shift:", err);
+      res.status(500).json({ message: "Error al crear el turno" });
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;

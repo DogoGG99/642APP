@@ -40,7 +40,15 @@ export const bills = pgTable("bills", {
   date: timestamp("date", { mode: 'string' }).notNull(),
 });
 
-// Insert schemas
+export const shifts = pgTable("shifts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  startTime: timestamp("start_time", { mode: 'string' }).notNull(),
+  endTime: timestamp("end_time", { mode: 'string' }),
+  status: text("status").notNull().default('active'),
+  notes: text("notes"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -64,15 +72,21 @@ export const insertBillSchema = createInsertSchema(bills).extend({
   date: z.string().transform(val => new Date(val).toISOString())
 });
 
-// Types
+export const insertShiftSchema = createInsertSchema(shifts).extend({
+  userId: z.coerce.number(),
+  startTime: z.string().transform(val => new Date(val).toISOString()),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertClient = z.infer<typeof insertClientSchema>;
 export type InsertInventory = z.infer<typeof insertInventorySchema>;
 export type InsertReservation = z.infer<typeof insertReservationSchema>;
 export type InsertBill = z.infer<typeof insertBillSchema>;
+export type InsertShift = z.infer<typeof insertShiftSchema>;
 
 export type User = typeof users.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type Inventory = typeof inventory.$inferSelect;
 export type Reservation = typeof reservations.$inferSelect;
 export type Bill = typeof bills.$inferSelect;
+export type Shift = typeof shifts.$inferSelect;
