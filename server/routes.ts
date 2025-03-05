@@ -259,12 +259,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verificar que el turno existe y pertenece al usuario
       const shift = await storage.getActiveShift(req.user!.id);
       if (!shift || shift.id !== id) {
+        console.log("No se encontró el turno activo o no pertenece al usuario:", { 
+          shiftId: id, 
+          userId: req.user!.id 
+        });
         return res.status(404).json({ message: "Turno no encontrado" });
       }
+
+      console.log("Cerrando turno:", { shiftId: id, currentStatus: shift.status });
 
       const updatedShift = await storage.updateShift(id, {
         endTime: new Date().toISOString(),
         status: 'closed'
+      });
+
+      console.log("Turno cerrado exitosamente:", { 
+        shiftId: id, 
+        newStatus: updatedShift.status 
       });
 
       res.json(updatedShift);

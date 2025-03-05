@@ -87,6 +87,7 @@ export default function ShiftsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/shifts/active"] });
+      // Forzar el estado a null inmediatamente
       queryClient.setQueryData(["/api/shifts/active"], null);
 
       toast({
@@ -108,6 +109,8 @@ export default function ShiftsPage() {
     queryKey: ["/api/shifts/active"],
     enabled: !!user,
     refetchInterval: 1000, // Refrescar cada segundo
+    staleTime: 0, // Considerar los datos obsoletos inmediatamente
+    cacheTime: 0, // No cachear los datos
   });
 
   function onSubmit(data: InsertShift) {
