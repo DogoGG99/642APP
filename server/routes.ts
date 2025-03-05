@@ -251,6 +251,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Nuevo endpoint para cerrar turno
+  app.patch("/api/shifts/:id/close", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const shift = await storage.updateShift(id, {
+        endTime: new Date().toISOString(),
+        status: 'closed'
+      });
+      res.json(shift);
+    } catch (err) {
+      console.error("Error closing shift:", err);
+      res.status(500).json({ message: "Error al cerrar el turno" });
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;

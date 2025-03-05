@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Clock, PlayCircle } from "lucide-react";
+import { Clock, PlayCircle, StopCircle } from "lucide-react";
 
 export default function ShiftsPage() {
   const { user } = useAuth();
@@ -78,6 +78,31 @@ export default function ShiftsPage() {
           variant: "destructive",
         });
       }
+    },
+  });
+
+  const closeShiftMutation = useMutation({
+    mutationFn: async (shiftId: number) => {
+      const res = await apiRequest("PATCH", `/api/shifts/${shiftId}/close`);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Error al cerrar el turno");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shifts/active"] });
+      toast({
+        title: "Éxito",
+        description: "Turno cerrado exitosamente",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -153,8 +178,16 @@ export default function ShiftsPage() {
 
       {activeShift ? (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle>Turno Activo</CardTitle>
+            <Button
+              variant="destructive"
+              onClick={() => closeShiftMutation.mutate(activeShift.id)}
+              disabled={closeShiftMutation.isPending}
+            >
+              <StopCircle className="mr-2 h-4 w-4" />
+              {closeShiftMutation.isPending ? "Cerrando..." : "Cerrar Turno"}
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
