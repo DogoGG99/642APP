@@ -21,6 +21,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -37,6 +44,7 @@ export default function ShiftsPage() {
     defaultValues: {
       userId: user?.id,
       startTime: new Date().toISOString(),
+      shiftType: 'matutino',
       notes: "",
     },
   });
@@ -60,19 +68,11 @@ export default function ShiftsPage() {
       });
     },
     onError: (error: Error) => {
-      if (error.message.includes("401")) {
-        toast({
-          title: "Error",
-          description: "Por favor inicia sesión para abrir un turno",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -86,7 +86,6 @@ export default function ShiftsPage() {
       return res.json();
     },
     onSuccess: () => {
-      // Invalidar la consulta actual y forzar una recarga
       queryClient.invalidateQueries({ queryKey: ["/api/shifts/active"] });
       queryClient.setQueryData(["/api/shifts/active"], null);
 
@@ -150,6 +149,27 @@ export default function ShiftsPage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField
                     control={form.control}
+                    name="shiftType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tipo de Turno</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecciona el tipo de turno" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="matutino">Matutino</SelectItem>
+                            <SelectItem value="vespertino">Vespertino</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="notes"
                     render={({ field }) => (
                       <FormItem>
@@ -184,7 +204,9 @@ export default function ShiftsPage() {
       {activeShift ? (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle>Turno Activo</CardTitle>
+            <CardTitle>
+              Turno {activeShift.shiftType.charAt(0).toUpperCase() + activeShift.shiftType.slice(1)} Activo
+            </CardTitle>
             <Button
               variant="destructive"
               onClick={() => closeShiftMutation.mutate(activeShift.id)}

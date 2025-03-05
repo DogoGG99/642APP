@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -21,7 +21,7 @@ export const inventory = pgTable("inventory", {
   name: text("name").notNull(),
   description: text("description"),
   quantity: integer("quantity").notNull(),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  price: text("price").notNull(),
 });
 
 export const reservations = pgTable("reservations", {
@@ -35,7 +35,7 @@ export const reservations = pgTable("reservations", {
 export const bills = pgTable("bills", {
   id: serial("id").primaryKey(),
   clientId: integer("client_id").notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: text("amount").notNull(),
   status: text("status").notNull(),
   date: timestamp("date", { mode: 'string' }).notNull(),
 });
@@ -46,6 +46,7 @@ export const shifts = pgTable("shifts", {
   startTime: timestamp("start_time", { mode: 'string' }).notNull(),
   endTime: timestamp("end_time", { mode: 'string' }),
   status: text("status").notNull().default('active'),
+  shiftType: text("shift_type").notNull(), 
   notes: text("notes"),
 });
 
@@ -58,7 +59,7 @@ export const insertClientSchema = createInsertSchema(clients);
 
 export const insertInventorySchema = createInsertSchema(inventory).extend({
   quantity: z.coerce.number(),
-  price: z.coerce.number()
+  price: z.coerce.number().transform(val => val.toString())
 });
 
 export const insertReservationSchema = createInsertSchema(reservations).extend({
@@ -68,13 +69,14 @@ export const insertReservationSchema = createInsertSchema(reservations).extend({
 
 export const insertBillSchema = createInsertSchema(bills).extend({
   clientId: z.coerce.number(),
-  amount: z.coerce.number(),
+  amount: z.coerce.number().transform(val => val.toString()),
   date: z.string().transform(val => new Date(val).toISOString())
 });
 
 export const insertShiftSchema = createInsertSchema(shifts).extend({
   userId: z.coerce.number(),
   startTime: z.string().transform(val => new Date(val).toISOString()),
+  shiftType: z.enum(['matutino', 'vespertino']), 
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
