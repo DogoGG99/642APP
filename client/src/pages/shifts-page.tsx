@@ -41,11 +41,6 @@ export default function ShiftsPage() {
     },
   });
 
-  const { data: activeShift, isLoading } = useQuery<Shift>({
-    queryKey: ["/api/shifts/active"],
-    enabled: !!user,
-  });
-
   const openShiftMutation = useMutation({
     mutationFn: async (data: InsertShift) => {
       const res = await apiRequest("POST", "/api/shifts", data);
@@ -91,7 +86,10 @@ export default function ShiftsPage() {
       return res.json();
     },
     onSuccess: () => {
+      // Invalidar la consulta actual y forzar una recarga
       queryClient.invalidateQueries({ queryKey: ["/api/shifts/active"] });
+      queryClient.setQueryData(["/api/shifts/active"], null);
+
       toast({
         title: "Éxito",
         description: "Turno cerrado exitosamente",
@@ -104,6 +102,13 @@ export default function ShiftsPage() {
         variant: "destructive",
       });
     },
+  });
+
+  // Actualizar la consulta para que se refresque automáticamente
+  const { data: activeShift, isLoading } = useQuery<Shift>({
+    queryKey: ["/api/shifts/active"],
+    enabled: !!user,
+    refetchInterval: 1000, // Refrescar cada segundo
   });
 
   function onSubmit(data: InsertShift) {

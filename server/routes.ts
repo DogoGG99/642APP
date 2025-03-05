@@ -26,9 +26,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const parsed = insertClientSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid client data",
-          errors: parsed.error.errors 
+          errors: parsed.error.errors
         });
       }
       const client = await storage.createClient(parsed.data);
@@ -76,9 +76,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const parsed = insertInventorySchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid inventory data",
-          errors: parsed.error.errors 
+          errors: parsed.error.errors
         });
       }
       const item = await storage.createInventoryItem(parsed.data);
@@ -126,9 +126,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const parsed = insertReservationSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid reservation data",
-          errors: parsed.error.errors 
+          errors: parsed.error.errors
         });
       }
       const reservation = await storage.createReservation(parsed.data);
@@ -176,9 +176,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const parsed = insertBillSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Invalid bill data",
-          errors: parsed.error.errors 
+          errors: parsed.error.errors
         });
       }
       const bill = await storage.createBill(parsed.data);
@@ -226,17 +226,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const parsed = insertShiftSchema.safeParse(req.body);
       if (!parsed.success) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           message: "Datos de turno inválidos",
-          errors: parsed.error.errors 
+          errors: parsed.error.errors
         });
       }
 
       // Verificar si ya existe un turno activo
       const activeShift = await storage.getActiveShift(req.user!.id);
       if (activeShift) {
-        return res.status(400).json({ 
-          message: "Ya tienes un turno activo" 
+        return res.status(400).json({
+          message: "Ya tienes un turno activo"
         });
       }
 
@@ -251,15 +251,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Nuevo endpoint para cerrar turno
+  // Endpoint para cerrar turno
   app.patch("/api/shifts/:id/close", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const shift = await storage.updateShift(id, {
+
+      // Verificar que el turno existe y pertenece al usuario
+      const shift = await storage.getActiveShift(req.user!.id);
+      if (!shift || shift.id !== id) {
+        return res.status(404).json({ message: "Turno no encontrado" });
+      }
+
+      const updatedShift = await storage.updateShift(id, {
         endTime: new Date().toISOString(),
         status: 'closed'
       });
-      res.json(shift);
+
+      res.json(updatedShift);
     } catch (err) {
       console.error("Error closing shift:", err);
       res.status(500).json({ message: "Error al cerrar el turno" });
