@@ -1,19 +1,18 @@
-import { jest, describe, it, expect, beforeAll, beforeEach } from '@jest/globals';
-import request from 'supertest';
-import express from 'express';
-import { storage } from '../server/storage';
-import { registerRoutes } from '../server/routes';
-import bcrypt from 'bcrypt';
-import type { User } from '@shared/schema';
+const { jest, describe, it, expect, beforeAll, beforeEach } = require('@jest/globals');
+const request = require('supertest');
+const express = require('express');
+const { storage } = require('../server/storage');
+const { registerRoutes } = require('../server/routes');
+const bcrypt = require('bcrypt');
 
 jest.mock('../server/storage');
 jest.mock('bcrypt');
 
-console.log('Loading auth.test.ts');
+console.log('Loading auth.test.js');
 
 describe('Authentication Tests', () => {
-  let app: express.Express;
-  const mockUser: User = {
+  let app;
+  const mockUser = {
     id: 1,
     username: 'testuser',
     password: 'hashedpassword',
@@ -24,8 +23,7 @@ describe('Authentication Tests', () => {
     console.log('Setting up auth tests');
     app = express();
     app.use(express.json());
-    // Configurar autenticación simulada antes de registrar las rutas
-    app.use((req: any, _res, next) => {
+    app.use((req, _res, next) => {
       req.isAuthenticated = () => true;
       req.user = mockUser;
       next();
@@ -50,8 +48,7 @@ describe('Authentication Tests', () => {
         role: 'user'
       });
 
-      const mockCompare = bcrypt.compare as jest.Mock;
-      mockCompare.mockResolvedValueOnce(false);
+      bcrypt.compare.mockResolvedValueOnce(false);
 
       // Act
       const response = await request(app)
@@ -71,9 +68,7 @@ describe('Authentication Tests', () => {
       // Arrange
       const mockedStorage = jest.mocked(storage);
       mockedStorage.getUserByUsername.mockResolvedValue(mockUser);
-
-      const mockCompare = bcrypt.compare as jest.Mock;
-      mockCompare.mockResolvedValueOnce(true);
+      bcrypt.compare.mockResolvedValueOnce(true);
 
       // Act
       const response = await request(app)

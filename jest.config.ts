@@ -9,20 +9,22 @@ const config: Config.InitialOptions = {
     '^@shared/(.*)$': '<rootDir>/shared/$1'
   },
   testMatch: [
-    '**/__tests__/**/*.ts?(x)',
-    '**/?(*.)+(spec|test).ts?(x)'
+    '**/__tests__/**/*.js',
+    '**/?(*.)+(spec|test).js'
   ],
   transform: {
+    '^.+\\.jsx?$': 'babel-jest',
     '^.+\\.tsx?$': ['ts-jest', {
-      tsconfig: 'tsconfig.test.json',
-      useESM: false
+      tsconfig: 'tsconfig.test.json'
     }]
   },
-  // Configuración para manejar módulos de Node.js
   setupFiles: ['<rootDir>/jest.setup.ts'],
   moduleDirectories: ['node_modules', '<rootDir>'],
   verbose: true,
-  testTimeout: 10000
+  testTimeout: 10000,
+  transformIgnorePatterns: [
+    'node_modules/(?!@shared)/'
+  ]
 };
 
 export default config;
