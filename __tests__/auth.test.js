@@ -2,14 +2,16 @@ const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals')
 const request = require('supertest');
 const express = require('express');
 const bcrypt = require('bcrypt');
+const { storage } = require('../server/storage');
+const { registerRoutes } = require('../server/routes');
 
-// Mock de storage
+// Mock storage
 const mockStorage = {
   getUserByUsername: jest.fn(),
   createUser: jest.fn()
 };
 
-jest.mock('../server/storage.ts', () => ({
+jest.mock('../server/storage', () => ({
   storage: mockStorage
 }));
 
@@ -37,8 +39,8 @@ describe('Authentication Tests', () => {
       next();
     });
 
-    const { registerRoutes } = await import('../server/routes.ts');
-    await registerRoutes(app);
+    const server = await registerRoutes(app);
+    return server;
   });
 
   beforeEach(() => {

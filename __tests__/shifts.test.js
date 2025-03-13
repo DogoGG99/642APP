@@ -1,16 +1,19 @@
 const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals');
 const request = require('supertest');
 const express = require('express');
+const { storage } = require('../server/storage');
 
-// Mock de storage
+// Mock storage
 const mockStorage = {
   getActiveShift: jest.fn(),
   createShift: jest.fn()
 };
 
-jest.mock('../server/storage.ts', () => ({
+jest.mock('../server/storage', () => ({
   storage: mockStorage
 }));
+
+const { registerRoutes } = require('../server/routes');
 
 console.log('Loading shifts.test.js');
 
@@ -34,8 +37,8 @@ describe('Shift Management Tests', () => {
       next();
     });
 
-    const { registerRoutes } = await import('../server/routes.ts');
-    await registerRoutes(app);
+    const server = await registerRoutes(app);
+    return server;
   });
 
   beforeEach(() => {
