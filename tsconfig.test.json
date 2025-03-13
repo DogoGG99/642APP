@@ -1,8 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "types": ["jest", "node"],
     "esModuleInterop": true,
     "isolatedModules": true,
@@ -11,6 +11,6 @@
     "allowJs": true,
     "checkJs": false
   },
-  "include": ["__tests__/**/*", "jest.setup.cjs"],
+  "include": ["__tests__/**/*", "jest.setup.cjs", "server/**/*", "shared/**/*"],
   "exclude": ["node_modules", "dist"]
 }

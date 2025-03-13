@@ -10,10 +10,12 @@ module.exports = {
     '**/?(*.)+(spec|test).js'
   ],
   transform: {
-    '^.+\\.jsx?$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', { targets: { node: 'current' } }]
-      ]
+    '^.+\\.ts$': ['ts-jest', {
+      tsconfig: 'tsconfig.test.json',
+      useESM: true
+    }],
+    '^.+\\.js$': ['babel-jest', {
+      presets: [['@babel/preset-env', { targets: { node: 'current' } }]]
     }]
   },
   setupFiles: ['<rootDir>/jest.setup.cjs'],
@@ -22,5 +24,7 @@ module.exports = {
   testTimeout: 10000,
   transformIgnorePatterns: [
     'node_modules/(?!@shared)/'
-  ]
+  ],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx']
 };
