@@ -1,3 +1,4 @@
+import { jest, describe, it, expect, beforeAll, beforeEach } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
 import { storage } from '../server/storage';
@@ -37,7 +38,7 @@ describe('Authentication Tests', () => {
         role: 'user'
       });
 
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      (bcrypt.compare as unknown as jest.Mock).mockResolvedValue(false);
 
       // Act
       const response = await request(app)
@@ -65,7 +66,8 @@ describe('Authentication Tests', () => {
 
       const mockedStorage = jest.mocked(storage);
       mockedStorage.getUserByUsername.mockResolvedValue(validUser);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      (bcrypt.compare as unknown as jest.Mock).mockResolvedValue(true);
 
       // Act
       const response = await request(app)

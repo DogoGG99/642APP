@@ -14,11 +14,8 @@ const config: Config.InitialOptions = {
   ],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      tsconfig: {
-        // Configuración específica para los tests
-        "esModuleInterop": true,
-        "module": "commonjs"
-      }
+      tsconfig: 'tsconfig.test.json',
+      useESM: false
     }]
   },
   // Configuración para manejar módulos de Node.js
