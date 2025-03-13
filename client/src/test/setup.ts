@@ -2,12 +2,14 @@ import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 import '@testing-library/jest-dom';
+import React from 'react';
 
 expect.extend(matchers);
 
-// Limpia el DOM después de cada prueba
+// Cleanup after each test
 afterEach(() => {
   cleanup();
+  vi.clearAllMocks();
 });
 
 // Mock global fetch
@@ -52,27 +54,33 @@ vi.mock('@tanstack/react-query', async () => {
 });
 
 // Mock Auth Hook
-vi.mock('@/hooks/use-auth', () => ({
-  useAuth: () => ({
-    user: null,
-    login: vi.fn(),
-    loginMutation: {
-      isPending: false,
-      isError: false,
-      error: null,
-      mutate: vi.fn(),
-      reset: vi.fn()
-    },
-    signupMutation: {
-      isPending: false,
-      isError: false,
-      error: null,
-      mutate: vi.fn(),
-      reset: vi.fn()
-    }
-  }),
-  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
-}));
+vi.mock('@/hooks/use-auth', () => {
+  const mockAuthProvider = ({ children }) => {
+    return React.createElement(React.Fragment, null, children);
+  };
+
+  return {
+    useAuth: () => ({
+      user: null,
+      login: vi.fn(),
+      loginMutation: {
+        isPending: false,
+        isError: false,
+        error: null,
+        mutate: vi.fn(),
+        reset: vi.fn()
+      },
+      signupMutation: {
+        isPending: false,
+        isError: false,
+        error: null,
+        mutate: vi.fn(),
+        reset: vi.fn()
+      }
+    }),
+    AuthProvider: mockAuthProvider
+  };
+});
 
 // Mock Toast Hook
 vi.mock('@/hooks/use-toast', () => ({
@@ -88,4 +96,10 @@ vi.mock('@/lib/queryClient', () => ({
     setQueryData: vi.fn()
   },
   apiRequest: vi.fn()
+}));
+
+// Mock wouter
+vi.mock('wouter', () => ({
+  useLocation: () => ["/", () => {}],
+  Link: ({ children, ...props }) => React.createElement('a', props, children)
 }));
