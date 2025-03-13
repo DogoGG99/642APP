@@ -10,7 +10,11 @@ const queryClient = new QueryClient({
   },
 });
 
-export function TestWrapper({ children }: { children: ReactNode }) {
+interface TestWrapperProps {
+  children: ReactNode;
+}
+
+export function TestWrapper({ children }: TestWrapperProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

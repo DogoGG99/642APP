@@ -11,7 +11,19 @@ vi.mock("wouter", () => ({
 vi.mock("@/hooks/use-auth", () => ({
   useAuth: () => ({
     user: null,
-    login: vi.fn()
+    login: vi.fn(),
+    loginMutation: {
+      isPending: false,
+      isError: false,
+      error: null,
+      mutate: vi.fn()
+    },
+    signupMutation: {
+      isPending: false,
+      isError: false,
+      error: null,
+      mutate: vi.fn()
+    }
   }),
   AuthProvider: ({ children }) => <>{children}</>
 }));

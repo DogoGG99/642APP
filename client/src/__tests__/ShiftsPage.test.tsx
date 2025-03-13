@@ -17,9 +17,36 @@ vi.mock("@/hooks/use-toast", () => ({
   })
 }));
 
-// Mock de las respuestas de la API
+// Mock de las mutaciones y queries
+vi.mock("@tanstack/react-query", async () => {
+  const actual = await vi.importActual("@tanstack/react-query");
+  return {
+    ...actual,
+    useMutation: () => ({
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+      reset: vi.fn()
+    }),
+    useQuery: () => ({
+      data: null,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+      isFetching: false
+    })
+  };
+});
+
+// Mock del cliente de consultas
 vi.mock("@/lib/queryClient", () => ({
-  queryClient: new QueryClient(),
+  queryClient: {
+    invalidateQueries: vi.fn(),
+    setQueryData: vi.fn()
+  },
   apiRequest: vi.fn()
 }));
 
