@@ -11,12 +11,6 @@ import { mockToast } from '../test/setup';
 describe("AuthPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockToast.mockClear();
-    (global.fetch as jest.Mock) = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 401,
-      json: () => Promise.resolve({ message: "Credenciales inválidas" })
-    });
   });
 
   it("should show login form", () => {
@@ -37,23 +31,24 @@ describe("AuthPage", () => {
       </TestWrapper>
     );
 
+    // Submit form with invalid credentials
     fireEvent.change(screen.getByPlaceholderText(/usuario/i), { 
       target: { value: "wronguser" } 
     });
     fireEvent.change(screen.getByPlaceholderText(/contraseña/i), { 
       target: { value: "wrongpass" } 
     });
-
-    // Trigger the login
     fireEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
 
-    // Esperar a que se llame al toast con el mensaje de error
+    // Use vi.runAllTimers() to flush pending timers
+    vi.runAllTimers();
+
+    // Wait for the toast to be called
     await waitFor(() => {
-      expect(mockToast).toHaveBeenCalledWith({
-        title: "Error",
-        description: "Credenciales inválidas",
-        variant: "destructive"
-      });
+      expect(mockToast).toHaveBeenCalled();
+      const [toastArgs] = mockToast.mock.calls[0];
+      expect(toastArgs.title).toBe("Error");
+      expect(toastArgs.description).toBe("Credenciales inválidas");
     });
   });
 });

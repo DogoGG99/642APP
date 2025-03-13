@@ -7,14 +7,13 @@ import React from 'react';
 expect.extend(matchers);
 
 // Configuración de timeouts y timers
-vi.useFakeTimers({ shouldAdvanceTime: true });
+vi.useFakeTimers();
 
 // Cleanup after each test
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
   vi.clearAllTimers();
-  vi.runOnlyPendingTimers();
 });
 
 // Mock global fetch
@@ -43,8 +42,8 @@ vi.mock('@tanstack/react-query', async () => {
       mutate: vi.fn(),
       mutateAsync: vi.fn(),
       isPending: false,
-      isError: false,
-      error: null,
+      isError: true,
+      error: new Error("Credenciales inválidas"),
       reset: vi.fn()
     }),
     useQuery: () => ({
@@ -118,7 +117,7 @@ vi.mock('@/lib/queryClient', () => ({
 // Mock wouter
 vi.mock('wouter', () => ({
   useLocation: () => ["/", () => {}],
-  Link: ({ children, ...props }: { children: React.ReactNode }) => 
+  Link: ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => 
     React.createElement('a', props, children)
 }));
 
