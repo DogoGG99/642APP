@@ -1,7 +1,13 @@
+/**
+ * @vitest-environment jsdom
+ */
+
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { TestWrapper } from "../test/test-utils";
 import AuthPage from "../pages/auth-page";
+
+global.fetch = vi.fn(); // Moved fetch mock outside the test
 
 describe("AuthPage", () => {
   beforeEach(() => {
@@ -20,12 +26,13 @@ describe("AuthPage", () => {
   });
 
   it("should show error with invalid credentials", async () => {
-    const mockFetch = vi.fn().mockResolvedValue({
+    
+    (global.fetch as any).mockResolvedValueOnce({ // Type assertion for better type safety
       ok: false,
       status: 401,
       json: () => Promise.resolve({ message: "Credenciales inválidas" })
     });
-    global.fetch = mockFetch;
+
 
     render(
       <TestWrapper>

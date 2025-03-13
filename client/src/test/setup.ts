@@ -55,7 +55,7 @@ vi.mock('@tanstack/react-query', async () => {
 
 // Mock Auth Hook
 vi.mock('@/hooks/use-auth', () => {
-  const mockAuthProvider = ({ children }) => {
+  const mockAuthProvider = ({ children }: { children: React.ReactNode }) => {
     return React.createElement(React.Fragment, null, children);
   };
 
@@ -71,6 +71,13 @@ vi.mock('@/hooks/use-auth', () => {
         reset: vi.fn()
       },
       signupMutation: {
+        isPending: false,
+        isError: false,
+        error: null,
+        mutate: vi.fn(),
+        reset: vi.fn()
+      },
+      registerMutation: {
         isPending: false,
         isError: false,
         error: null,
@@ -101,5 +108,6 @@ vi.mock('@/lib/queryClient', () => ({
 // Mock wouter
 vi.mock('wouter', () => ({
   useLocation: () => ["/", () => {}],
-  Link: ({ children, ...props }) => React.createElement('a', props, children)
+  Link: ({ children, ...props }: { children: React.ReactNode }) => 
+    React.createElement('a', props, children)
 }));
