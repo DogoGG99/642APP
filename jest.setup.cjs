@@ -1,11 +1,9 @@
-/// <reference types="jest" />
-// Configuración global para Jest
-import { TextEncoder, TextDecoder } from 'util';
-import { jest } from '@jest/globals';
+const { TextEncoder, TextDecoder } = require('util');
+const { jest } = require('@jest/globals');
 
 // Configurar encoders/decoders globales
 global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any;
+global.TextDecoder = TextDecoder;
 
 // Configurar mocks globales si es necesario
 const mockBcrypt = {

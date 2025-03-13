@@ -7,12 +7,14 @@ module.exports = {
   },
   testMatch: [
     '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).js'
+    '**/?(*.)+(spec|test).[jt]s?(x)'
   ],
   transform: {
-    '^.+\\.(js|jsx)$': 'babel-jest'
+    '^.+\\.[tj]sx?$': ['ts-jest', {
+      tsconfig: 'tsconfig.test.json'
+    }]
   },
-  setupFiles: ['<rootDir>/jest.setup.ts'],
+  setupFiles: ['<rootDir>/jest.setup.cjs'],
   moduleDirectories: ['node_modules', '<rootDir>'],
   verbose: true,
   testTimeout: 10000,
