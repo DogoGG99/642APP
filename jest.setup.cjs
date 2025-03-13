@@ -1,5 +1,4 @@
 const { TextEncoder, TextDecoder } = require('util');
-const { jest } = require('@jest/globals');
 
 // Configurar encoders/decoders globales
 global.TextEncoder = TextEncoder;

@@ -7,8 +7,10 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "strict": true,
-    "noEmit": true
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["__tests__/**/*", "jest.setup.ts"],
+  "include": ["__tests__/**/*", "jest.setup.cjs"],
   "exclude": ["node_modules", "dist"]
 }

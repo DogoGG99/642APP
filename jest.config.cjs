@@ -7,11 +7,13 @@ module.exports = {
   },
   testMatch: [
     '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).[jt]s?(x)'
+    '**/?(*.)+(spec|test).js'
   ],
   transform: {
-    '^.+\\.[tj]sx?$': ['ts-jest', {
-      tsconfig: 'tsconfig.test.json'
+    '^.+\\.jsx?$': ['babel-jest', {
+      presets: [
+        ['@babel/preset-env', { targets: { node: 'current' } }]
+      ]
     }]
   },
   setupFiles: ['<rootDir>/jest.setup.cjs'],
