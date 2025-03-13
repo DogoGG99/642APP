@@ -7,13 +7,14 @@ import React from 'react';
 expect.extend(matchers);
 
 // Configuración de timeouts y timers
-vi.useFakeTimers();
+vi.useFakeTimers({ shouldAdvanceTime: true });
 
 // Cleanup after each test
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
   vi.clearAllTimers();
+  vi.runOnlyPendingTimers();
 });
 
 // Mock global fetch
@@ -106,7 +107,10 @@ vi.mock('@/lib/queryClient', () => ({
     invalidateQueries: vi.fn(),
     setQueryData: vi.fn()
   },
-  apiRequest: vi.fn()
+  apiRequest: vi.fn().mockImplementation(async () => ({
+    ok: true,
+    json: async () => ({})
+  }))
 }));
 
 // Mock wouter

@@ -9,6 +9,7 @@ import AuthPage from "../pages/auth-page";
 
 const mockToast = vi.fn();
 
+// Configure los mocks antes de importar el componente
 vi.mock("@/hooks/use-toast", () => ({
   useToast: () => ({
     toast: mockToast
@@ -18,6 +19,7 @@ vi.mock("@/hooks/use-toast", () => ({
 describe("AuthPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockToast.mockClear();
     (global.fetch as jest.Mock) = vi.fn();
   });
 
@@ -33,11 +35,13 @@ describe("AuthPage", () => {
   });
 
   it("should show error with invalid credentials", async () => {
-    (global.fetch as jest.Mock).mockResolvedValueOnce({
+    const mockResponse = {
       ok: false,
       status: 401,
       json: () => Promise.resolve({ message: "Credenciales inválidas" })
-    });
+    };
+
+    (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
 
     render(
       <TestWrapper>
@@ -51,9 +55,11 @@ describe("AuthPage", () => {
     fireEvent.change(screen.getByPlaceholderText(/contraseña/i), { 
       target: { value: "wrongpass" } 
     });
+
+    // Trigger the login
     fireEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
 
-    // Usar act y waitFor para manejar correctamente las actualizaciones asíncronas
+    // Esperar a que se llame al toast con el mensaje de error
     await waitFor(() => {
       expect(mockToast).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -62,6 +68,9 @@ describe("AuthPage", () => {
           variant: "destructive"
         })
       );
-    }, { timeout: 2000 });
+    }, { timeout: 1000 }); // Reducir el timeout a 1 segundo
+
+    // Verificar que fetch fue llamado con los parámetros correctos
+    expect(global.fetch).toHaveBeenCalledTimes(1);
   });
 });
