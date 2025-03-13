@@ -2,15 +2,15 @@
  * @vitest-environment jsdom
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, beforeEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { TestWrapper } from "../test/test-utils";
 import AuthPage from "../pages/auth-page";
 import { mockToast } from '../test/setup';
 
 describe("AuthPage", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockToast.mockClear();
   });
 
   it("should show login form", () => {
@@ -31,24 +31,26 @@ describe("AuthPage", () => {
       </TestWrapper>
     );
 
-    // Submit form with invalid credentials
-    fireEvent.change(screen.getByPlaceholderText(/usuario/i), { 
-      target: { value: "wronguser" } 
+    // Fill in form with invalid credentials
+    fireEvent.change(screen.getByPlaceholderText(/usuario/i), {
+      target: { value: "wronguser" }
     });
-    fireEvent.change(screen.getByPlaceholderText(/contraseña/i), { 
-      target: { value: "wrongpass" } 
+    fireEvent.change(screen.getByPlaceholderText(/contraseña/i), {
+      target: { value: "wrongpass" }
     });
-    fireEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
 
-    // Use vi.runAllTimers() to flush pending timers
-    vi.runAllTimers();
+    // Trigger login and handle promise rejection
+    try {
+      await fireEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
+    } catch (error) {
+      // Expected error, ignore it
+    }
 
-    // Wait for the toast to be called
-    await waitFor(() => {
-      expect(mockToast).toHaveBeenCalled();
-      const [toastArgs] = mockToast.mock.calls[0];
-      expect(toastArgs.title).toBe("Error");
-      expect(toastArgs.description).toBe("Credenciales inválidas");
+    // Verify toast was called with error message
+    expect(mockToast).toHaveBeenCalledWith({
+      title: "Error",
+      description: "Credenciales inválidas",
+      variant: "destructive"
     });
   });
 });

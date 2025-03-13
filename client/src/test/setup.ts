@@ -6,14 +6,10 @@ import React from 'react';
 
 expect.extend(matchers);
 
-// Configuración de timeouts y timers
-vi.useFakeTimers();
-
 // Cleanup after each test
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  vi.clearAllTimers();
 });
 
 // Mock global fetch
@@ -39,57 +35,11 @@ vi.mock('@tanstack/react-query', async () => {
   return {
     ...actual,
     useMutation: () => ({
-      mutate: vi.fn(),
-      mutateAsync: vi.fn(),
+      mutate: vi.fn().mockRejectedValue(new Error("Credenciales inválidas")),
       isPending: false,
       isError: true,
-      error: new Error("Credenciales inválidas"),
-      reset: vi.fn()
-    }),
-    useQuery: () => ({
-      data: null,
-      isLoading: false,
-      isError: false,
-      error: null,
-      refetch: vi.fn(),
-      isFetching: false
+      error: new Error("Credenciales inválidas")
     })
-  };
-});
-
-// Mock Auth Hook
-vi.mock('@/hooks/use-auth', () => {
-  const mockAuthProvider = ({ children }: { children: React.ReactNode }) => {
-    return React.createElement(React.Fragment, null, children);
-  };
-
-  return {
-    useAuth: () => ({
-      user: null,
-      login: vi.fn(),
-      loginMutation: {
-        isPending: false,
-        isError: true,
-        error: new Error("Credenciales inválidas"),
-        mutate: vi.fn(),
-        reset: vi.fn()
-      },
-      signupMutation: {
-        isPending: false,
-        isError: false,
-        error: null,
-        mutate: vi.fn(),
-        reset: vi.fn()
-      },
-      registerMutation: {
-        isPending: false,
-        isError: false,
-        error: null,
-        mutate: vi.fn(),
-        reset: vi.fn()
-      }
-    }),
-    AuthProvider: mockAuthProvider
   };
 });
 
@@ -101,24 +51,24 @@ vi.mock('@/hooks/use-toast', () => ({
   })
 }));
 
-// Mock Query Client
-vi.mock('@/lib/queryClient', () => ({
-  queryClient: {
-    invalidateQueries: vi.fn(),
-    setQueryData: vi.fn()
-  },
-  apiRequest: vi.fn().mockImplementation(async () => ({
-    ok: false,
-    status: 401,
-    json: async () => ({ message: "Credenciales inválidas" })
-  }))
+// Mock Auth Hook
+vi.mock('@/hooks/use-auth', () => ({
+  useAuth: () => ({
+    user: null,
+    loginMutation: {
+      mutate: vi.fn().mockRejectedValue(new Error("Credenciales inválidas")),
+      isPending: false,
+      isError: true,
+      error: new Error("Credenciales inválidas")
+    }
+  }),
+  AuthProvider: ({ children }) => React.createElement(React.Fragment, null, children)
 }));
 
 // Mock wouter
 vi.mock('wouter', () => ({
   useLocation: () => ["/", () => {}],
-  Link: ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => 
-    React.createElement('a', props, children)
+  Link: ({ children, ...props }) => React.createElement('a', props, children)
 }));
 
 // Export mock toast for tests
