@@ -4,6 +4,7 @@ import express from 'express';
 import { storage } from '../server/storage';
 import { registerRoutes } from '../server/routes';
 import bcrypt from 'bcrypt';
+import type { User } from '@shared/schema';
 
 jest.mock('../server/storage');
 jest.mock('bcrypt');
@@ -38,7 +39,7 @@ describe('Authentication Tests', () => {
         role: 'user'
       });
 
-      (bcrypt.compare as unknown as jest.Mock).mockResolvedValue(false);
+      jest.mocked(bcrypt.compare).mockResolvedValueOnce(false);
 
       // Act
       const response = await request(app)
@@ -66,8 +67,7 @@ describe('Authentication Tests', () => {
 
       const mockedStorage = jest.mocked(storage);
       mockedStorage.getUserByUsername.mockResolvedValue(validUser);
-
-      (bcrypt.compare as unknown as jest.Mock).mockResolvedValue(true);
+      jest.mocked(bcrypt.compare).mockResolvedValueOnce(true);
 
       // Act
       const response = await request(app)

@@ -8,10 +8,13 @@ global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as any;
 
 // Configurar mocks globales si es necesario
-jest.mock('bcrypt', () => ({
-  hash: jest.fn<(text: string, rounds: number) => Promise<string>>().mockResolvedValue('hashedPassword'),
-  compare: jest.fn<(text: string, hash: string) => Promise<boolean>>().mockResolvedValue(true)
-}));
+jest.mock('bcrypt', () => {
+  const mock = {
+    hash: jest.fn((_data: string, _salt: number) => Promise.resolve('hashedPassword')),
+    compare: jest.fn((_data: string, _hash: string) => Promise.resolve(true))
+  };
+  return mock;
+});
 
 // Logging para debug
 console.log('Jest setup file loaded');
