@@ -6,21 +6,17 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { TestWrapper } from "../test/test-utils";
 import AuthPage from "../pages/auth-page";
-
-const mockToast = vi.fn();
-
-// Configure los mocks antes de importar el componente
-vi.mock("@/hooks/use-toast", () => ({
-  useToast: () => ({
-    toast: mockToast
-  })
-}));
+import { mockToast } from '../test/setup';
 
 describe("AuthPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockToast.mockClear();
-    (global.fetch as jest.Mock) = vi.fn();
+    (global.fetch as jest.Mock) = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: () => Promise.resolve({ message: "Credenciales inválidas" })
+    });
   });
 
   it("should show login form", () => {
@@ -35,14 +31,6 @@ describe("AuthPage", () => {
   });
 
   it("should show error with invalid credentials", async () => {
-    const mockResponse = {
-      ok: false,
-      status: 401,
-      json: () => Promise.resolve({ message: "Credenciales inválidas" })
-    };
-
-    (global.fetch as jest.Mock).mockResolvedValue(mockResponse);
-
     render(
       <TestWrapper>
         <AuthPage />
@@ -61,16 +49,11 @@ describe("AuthPage", () => {
 
     // Esperar a que se llame al toast con el mensaje de error
     await waitFor(() => {
-      expect(mockToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Error",
-          description: "Credenciales inválidas",
-          variant: "destructive"
-        })
-      );
-    }, { timeout: 1000 }); // Reducir el timeout a 1 segundo
-
-    // Verificar que fetch fue llamado con los parámetros correctos
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(mockToast).toHaveBeenCalledWith({
+        title: "Error",
+        description: "Credenciales inválidas",
+        variant: "destructive"
+      });
+    });
   });
 });

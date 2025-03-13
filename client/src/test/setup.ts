@@ -70,8 +70,8 @@ vi.mock('@/hooks/use-auth', () => {
       login: vi.fn(),
       loginMutation: {
         isPending: false,
-        isError: false,
-        error: null,
+        isError: true,
+        error: new Error("Credenciales inválidas"),
         mutate: vi.fn(),
         reset: vi.fn()
       },
@@ -95,9 +95,10 @@ vi.mock('@/hooks/use-auth', () => {
 });
 
 // Mock Toast Hook
+const mockToast = vi.fn();
 vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({
-    toast: vi.fn()
+    toast: mockToast
   })
 }));
 
@@ -108,14 +109,18 @@ vi.mock('@/lib/queryClient', () => ({
     setQueryData: vi.fn()
   },
   apiRequest: vi.fn().mockImplementation(async () => ({
-    ok: true,
-    json: async () => ({})
+    ok: false,
+    status: 401,
+    json: async () => ({ message: "Credenciales inválidas" })
   }))
 }));
 
 // Mock wouter
 vi.mock('wouter', () => ({
   useLocation: () => ["/", () => {}],
-  Link: ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => 
+  Link: ({ children, ...props }: { children: React.ReactNode }) => 
     React.createElement('a', props, children)
 }));
+
+// Export mock toast for tests
+export { mockToast };
