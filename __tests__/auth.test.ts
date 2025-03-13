@@ -7,21 +7,26 @@ import bcrypt from 'bcrypt';
 jest.mock('../server/storage');
 jest.mock('bcrypt');
 
+console.log('Loading auth.test.ts');
+
 describe('Authentication Tests', () => {
   let app: express.Express;
 
   beforeAll(async () => {
+    console.log('Setting up auth tests');
     app = express();
     app.use(express.json());
     await registerRoutes(app);
   });
 
   beforeEach(() => {
+    console.log('Clearing mocks before test');
     jest.clearAllMocks();
   });
 
   describe('Login Tests', () => {
     it('should return 401 when credentials are invalid', async () => {
+      console.log('Running invalid credentials test');
       // Arrange
       const hashedPassword = await bcrypt.hash('correctpassword', 10);
       const mockedStorage = jest.mocked(storage);
@@ -48,6 +53,7 @@ describe('Authentication Tests', () => {
     });
 
     it('should return 200 and user data when credentials are valid', async () => {
+      console.log('Running valid credentials test');
       // Arrange
       const hashedPassword = await bcrypt.hash('correctpassword', 10);
       const validUser = {
@@ -76,6 +82,7 @@ describe('Authentication Tests', () => {
     });
 
     it('should handle server errors during login', async () => {
+      console.log('Running server error test');
       // Arrange
       const mockedStorage = jest.mocked(storage);
       mockedStorage.getUserByUsername.mockRejectedValue(new Error('Database error'));

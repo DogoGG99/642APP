@@ -6,6 +6,8 @@ import type { User, Shift } from '../shared/schema';
 
 jest.mock('../server/storage');
 
+console.log('Loading shifts.test.ts');
+
 describe('Shift Management Tests', () => {
   let app: express.Express;
   const mockUser: User = {
@@ -16,6 +18,7 @@ describe('Shift Management Tests', () => {
   };
 
   beforeAll(async () => {
+    console.log('Setting up shifts tests');
     app = express();
     app.use(express.json());
     // Configurar autenticación simulada antes de registrar las rutas
@@ -28,11 +31,13 @@ describe('Shift Management Tests', () => {
   });
 
   beforeEach(() => {
+    console.log('Clearing mocks before test');
     jest.clearAllMocks();
   });
 
   describe('Open Shift Tests', () => {
     it('should not allow opening a shift when user already has an active shift', async () => {
+      console.log('Running active shift test');
       // Arrange
       const mockActiveShift: Shift = {
         id: 1,
@@ -64,6 +69,7 @@ describe('Shift Management Tests', () => {
     });
 
     it('should successfully open a new shift', async () => {
+      console.log('Running new shift test');
       // Arrange
       const mockedStorage = jest.mocked(storage);
       mockedStorage.getActiveShift.mockResolvedValue(undefined);
@@ -99,6 +105,7 @@ describe('Shift Management Tests', () => {
     });
 
     it('should handle validation errors when creating a shift', async () => {
+      console.log('Running validation error test');
       // Arrange
       const invalidShiftData = {
         userId: mockUser.id,
