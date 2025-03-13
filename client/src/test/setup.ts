@@ -1,6 +1,7 @@
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import '@testing-library/jest-dom';
 
 expect.extend(matchers);
 
@@ -70,7 +71,7 @@ vi.mock('@/hooks/use-auth', () => ({
       reset: vi.fn()
     }
   }),
-  AuthProvider: ({ children }) => <>{children}</>
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
 
 // Mock Toast Hook

@@ -3,30 +3,23 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { TestWrapper } from "../test/test-utils";
 import AuthPage from "../pages/auth-page";
 
-vi.mock("wouter", () => ({
-  useLocation: () => ["/auth", () => {}]
-}));
-
 describe("AuthPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("debería mostrar el formulario de login", () => {
+  it("should show login form", () => {
     render(
       <TestWrapper>
         <AuthPage />
       </TestWrapper>
     );
 
-    const usernameInput = screen.getByPlaceholderText(/usuario/i);
-    const passwordInput = screen.getByPlaceholderText(/contraseña/i);
-
-    expect(usernameInput).toBeInTheDocument();
-    expect(passwordInput).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/usuario/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/contraseña/i)).toBeInTheDocument();
   });
 
-  it("debería mostrar error con credenciales inválidas", async () => {
+  it("should show error with invalid credentials", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
@@ -40,13 +33,13 @@ describe("AuthPage", () => {
       </TestWrapper>
     );
 
-    const usernameInput = screen.getByPlaceholderText(/usuario/i);
-    const passwordInput = screen.getByPlaceholderText(/contraseña/i);
-    const submitButton = screen.getByRole("button", { name: /iniciar sesión/i });
-
-    fireEvent.change(usernameInput, { target: { value: "wronguser" } });
-    fireEvent.change(passwordInput, { target: { value: "wrongpass" } });
-    fireEvent.click(submitButton);
+    fireEvent.change(screen.getByPlaceholderText(/usuario/i), { 
+      target: { value: "wronguser" } 
+    });
+    fireEvent.change(screen.getByPlaceholderText(/contraseña/i), { 
+      target: { value: "wrongpass" } 
+    });
+    fireEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
 
     const errorMessage = await screen.findByText(/credenciales inválidas/i);
     expect(errorMessage).toBeInTheDocument();
