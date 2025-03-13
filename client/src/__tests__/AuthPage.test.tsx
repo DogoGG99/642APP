@@ -3,15 +3,22 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { TestWrapper } from "../test/test-utils";
 import AuthPage from "../pages/auth-page";
 
-global.fetch = vi.fn(); // Moved fetch mock outside the test
+const mockToast = vi.fn();
+
+vi.mock("@/hooks/use-toast", () => ({
+  useToast: () => ({
+    toast: mockToast
+  })
+}));
 
 describe("AuthPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (global.fetch as jest.Mock) = vi.fn();
   });
 
   it("should show login form", () => {
@@ -26,13 +33,11 @@ describe("AuthPage", () => {
   });
 
   it("should show error with invalid credentials", async () => {
-    
-    (global.fetch as any).mockResolvedValueOnce({ // Type assertion for better type safety
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
       status: 401,
       json: () => Promise.resolve({ message: "Credenciales inválidas" })
     });
-
 
     render(
       <TestWrapper>
@@ -48,7 +53,15 @@ describe("AuthPage", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
 
-    const errorMessage = await screen.findByText(/credenciales inválidas/i);
-    expect(errorMessage).toBeInTheDocument();
+    // Usar act y waitFor para manejar correctamente las actualizaciones asíncronas
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Error",
+          description: "Credenciales inválidas",
+          variant: "destructive"
+        })
+      );
+    }, { timeout: 2000 });
   });
 });

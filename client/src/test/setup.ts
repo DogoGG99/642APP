@@ -6,10 +6,14 @@ import React from 'react';
 
 expect.extend(matchers);
 
+// Configuración de timeouts y timers
+vi.useFakeTimers();
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  vi.clearAllTimers();
 });
 
 // Mock global fetch
@@ -108,6 +112,6 @@ vi.mock('@/lib/queryClient', () => ({
 // Mock wouter
 vi.mock('wouter', () => ({
   useLocation: () => ["/", () => {}],
-  Link: ({ children, ...props }: { children: React.ReactNode }) => 
+  Link: ({ children, ...props }: { children: React.ReactNode; [key: string]: any }) => 
     React.createElement('a', props, children)
 }));
