@@ -1,23 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import ShiftsPage from "../pages/shifts-page";
-import { TestWrapper } from "../test/test-utils";
 
-// Mock de los hooks y componentes necesarios
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
-    user: { id: 1, username: "testuser" }
-  }),
-  AuthProvider: ({ children }) => <>{children}</>
-}));
-
-vi.mock("@/hooks/use-toast", () => ({
-  useToast: () => ({
-    toast: vi.fn()
-  })
-}));
-
-// Mock de las mutaciones y queries
+// Mock los hooks necesarios antes de importar el componente
 vi.mock("@tanstack/react-query", async () => {
   const actual = await vi.importActual("@tanstack/react-query");
   return {
@@ -41,7 +25,26 @@ vi.mock("@tanstack/react-query", async () => {
   };
 });
 
-// Mock del cliente de consultas
+vi.mock("@/hooks/use-auth", () => ({
+  useAuth: () => ({
+    user: { id: 1, username: "testuser" },
+    loginMutation: {
+      isPending: false,
+      isError: false,
+      error: null,
+      mutate: vi.fn(),
+      reset: vi.fn()
+    }
+  }),
+  AuthProvider: ({ children }) => <>{children}</>
+}));
+
+vi.mock("@/hooks/use-toast", () => ({
+  useToast: () => ({
+    toast: vi.fn()
+  })
+}));
+
 vi.mock("@/lib/queryClient", () => ({
   queryClient: {
     invalidateQueries: vi.fn(),
@@ -50,36 +53,40 @@ vi.mock("@/lib/queryClient", () => ({
   apiRequest: vi.fn()
 }));
 
+// Importar el componente después de los mocks
+import ShiftsPage from "../pages/shifts-page";
+import { TestWrapper } from "../test/test-utils";
+
 describe("ShiftsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("debería mostrar el botón de 'Abrir Turno' cuando no hay turno activo", async () => {
+  it("debería mostrar el botón de 'Abrir Turno' cuando no hay turno activo", () => {
     render(
       <TestWrapper>
         <ShiftsPage />
       </TestWrapper>
     );
 
-    const button = await screen.findByText("Abrir Turno");
-    expect(button).toBeDefined();
+    const button = screen.getByText("Abrir Turno");
+    expect(button).toBeInTheDocument();
   });
 
-  it("debería mostrar el formulario de apertura de turno al hacer click en el botón", async () => {
+  it("debería mostrar el formulario de apertura de turno al hacer click en el botón", () => {
     render(
       <TestWrapper>
         <ShiftsPage />
       </TestWrapper>
     );
 
-    const openButton = await screen.findByText("Abrir Turno");
+    const openButton = screen.getByText("Abrir Turno");
     fireEvent.click(openButton);
 
-    const formTitle = await screen.findByText("Abrir Nuevo Turno");
-    const shiftTypeLabel = await screen.findByText("Tipo de Turno");
+    const formTitle = screen.getByText("Abrir Nuevo Turno");
+    const shiftTypeLabel = screen.getByText("Tipo de Turno");
 
-    expect(formTitle).toBeDefined();
-    expect(shiftTypeLabel).toBeDefined();
+    expect(formTitle).toBeInTheDocument();
+    expect(shiftTypeLabel).toBeInTheDocument();
   });
 });

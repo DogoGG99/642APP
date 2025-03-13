@@ -25,3 +25,66 @@ global.IntersectionObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+
+// Mock React Query
+vi.mock('@tanstack/react-query', async () => {
+  const actual = await vi.importActual('@tanstack/react-query');
+  return {
+    ...actual,
+    useMutation: () => ({
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+      reset: vi.fn()
+    }),
+    useQuery: () => ({
+      data: null,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+      isFetching: false
+    })
+  };
+});
+
+// Mock Auth Hook
+vi.mock('@/hooks/use-auth', () => ({
+  useAuth: () => ({
+    user: null,
+    login: vi.fn(),
+    loginMutation: {
+      isPending: false,
+      isError: false,
+      error: null,
+      mutate: vi.fn(),
+      reset: vi.fn()
+    },
+    signupMutation: {
+      isPending: false,
+      isError: false,
+      error: null,
+      mutate: vi.fn(),
+      reset: vi.fn()
+    }
+  }),
+  AuthProvider: ({ children }) => <>{children}</>
+}));
+
+// Mock Toast Hook
+vi.mock('@/hooks/use-toast', () => ({
+  useToast: () => ({
+    toast: vi.fn()
+  })
+}));
+
+// Mock Query Client
+vi.mock('@/lib/queryClient', () => ({
+  queryClient: {
+    invalidateQueries: vi.fn(),
+    setQueryData: vi.fn()
+  },
+  apiRequest: vi.fn()
+}));
