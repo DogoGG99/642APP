@@ -1,34 +1,23 @@
 module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>'],
+  moduleDirectories: ['node_modules', '<rootDir>'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/client/src/$1',
     '^@shared/(.*)$': '<rootDir>/shared/$1',
     '^server/(.*)$': '<rootDir>/server/$1'
   },
-  testMatch: [
-    '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).js'
-  ],
   transform: {
-    '^.+\\.[tj]sx?$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', { 
-          targets: { node: 'current' },
-          modules: 'commonjs'
-        }],
-        '@babel/preset-typescript'
-      ]
+    '^.+\\.[jt]sx?$': ['babel-jest', {
+      configFile: './babel.config.cjs'
     }]
   },
+  testMatch: ['**/__tests__/**/*.js'],
   setupFiles: ['<rootDir>/jest.setup.cjs'],
-  moduleDirectories: ['node_modules', '<rootDir>'],
   verbose: true,
-  testTimeout: 30000,
+  testTimeout: 10000,
   transformIgnorePatterns: [
     'node_modules/(?!@shared)/'
   ],
-  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json', 'node'],
-  clearMocks: true,
-  resetMocks: true
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json', 'node']
 };

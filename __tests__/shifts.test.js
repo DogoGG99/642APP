@@ -2,30 +2,20 @@ const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals')
 const request = require('supertest');
 const express = require('express');
 
-// Mock storage
-const mockStorage = {
-  getActiveShift: jest.fn(),
-  createShift: jest.fn(),
-  updateShift: jest.fn()
-};
-
-// Mock modules
-jest.mock('server/storage', () => ({
-  storage: mockStorage
-}));
-
 describe('Shift Management Tests', () => {
   let app;
-  const mockUser = {
-    id: 1,
-    username: 'testuser',
-    password: 'hashedpassword',
-    role: 'user'
+  let mockStorage;
+  const mockUser = { 
+    id: 1, 
+    username: 'testuser', 
+    role: 'user' 
   };
 
   beforeAll(async () => {
-    const { registerRoutes } = require('server/routes');
+    console.log('Setting up Shift Management Tests');
+    mockStorage = global.__mocks__.storage;
 
+    const { registerRoutes } = require('server/routes');
     app = express();
     app.use(express.json());
 
@@ -46,6 +36,7 @@ describe('Shift Management Tests', () => {
   describe('Open Shift Tests', () => {
     it('should not allow opening a shift when user already has an active shift', async () => {
       // Arrange
+      console.log('Testing duplicate shift prevention');
       const mockActiveShift = {
         id: 1,
         userId: mockUser.id,
@@ -58,16 +49,13 @@ describe('Shift Management Tests', () => {
 
       mockStorage.getActiveShift.mockResolvedValue(mockActiveShift);
 
-      const shiftData = {
-        userId: mockUser.id,
-        startTime: new Date().toISOString(),
-        shiftType: 'matutino'
-      };
-
       // Act
       const response = await request(app)
         .post('/api/shifts')
-        .send(shiftData);
+        .send({
+          startTime: new Date().toISOString(),
+          shiftType: 'matutino'
+        });
 
       // Assert
       expect(response.status).toBe(400);
@@ -77,7 +65,8 @@ describe('Shift Management Tests', () => {
 
     it('should successfully open a new shift', async () => {
       // Arrange
-      mockStorage.getActiveShift.mockResolvedValue(undefined);
+      console.log('Testing successful shift creation');
+      mockStorage.getActiveShift.mockResolvedValue(null);
 
       const newShift = {
         id: 2,
@@ -91,16 +80,13 @@ describe('Shift Management Tests', () => {
 
       mockStorage.createShift.mockResolvedValue(newShift);
 
-      const shiftData = {
-        userId: mockUser.id,
-        startTime: new Date().toISOString(),
-        shiftType: 'matutino'
-      };
-
       // Act
       const response = await request(app)
         .post('/api/shifts')
-        .send(shiftData);
+        .send({
+          startTime: new Date().toISOString(),
+          shiftType: 'matutino'
+        });
 
       // Assert
       expect(response.status).toBe(201);
@@ -108,6 +94,7 @@ describe('Shift Management Tests', () => {
       expect(response.body).toHaveProperty('status', 'active');
       expect(response.body).toHaveProperty('shiftType', 'matutino');
       expect(mockStorage.createShift).toHaveBeenCalled();
+      expect(mockStorage.getActiveShift).toHaveBeenCalledWith(mockUser.id);
     });
   });
 });
