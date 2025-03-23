@@ -23,6 +23,8 @@ describe('Authentication Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStorage.getUserByUsername.mockReset();
+    mockBcrypt.compare.mockReset();
   });
 
   afterAll((done) => {
@@ -56,17 +58,18 @@ describe('Authentication Tests', () => {
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('message', 'Credenciales inválidas');
       expect(mockStorage.getUserByUsername).toHaveBeenCalledWith('nonexistent');
+      expect(mockBcrypt.compare).not.toHaveBeenCalled();
     });
 
     it('should return 401 when password is incorrect', async () => {
-      const testUser = {
+      const mockUser = {
         id: 1,
         username: 'testuser',
         password: 'hashedpassword',
         role: 'user'
       };
 
-      mockStorage.getUserByUsername.mockResolvedValue(testUser);
+      mockStorage.getUserByUsername.mockResolvedValue(mockUser);
       mockBcrypt.compare.mockResolvedValue(false);
 
       const response = await request(app)
@@ -82,14 +85,14 @@ describe('Authentication Tests', () => {
     });
 
     it('should return 200 and user data when credentials are valid', async () => {
-      const testUser = {
+      const mockUser = {
         id: 1,
         username: 'testuser',
         password: 'hashedpassword',
         role: 'user'
       };
 
-      mockStorage.getUserByUsername.mockResolvedValue(testUser);
+      mockStorage.getUserByUsername.mockResolvedValue(mockUser);
       mockBcrypt.compare.mockResolvedValue(true);
 
       const response = await request(app)
@@ -102,9 +105,9 @@ describe('Authentication Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
-        id: testUser.id,
-        username: testUser.username,
-        role: testUser.role
+        id: mockUser.id,
+        username: mockUser.username,
+        role: mockUser.role
       });
     });
   });

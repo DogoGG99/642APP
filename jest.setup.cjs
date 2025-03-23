@@ -2,9 +2,12 @@ const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Mock de storage con implementación simple y segura
+// Mock básico de storage con manejo de errores
 const mockStorage = {
-  getUserByUsername: jest.fn((username) => {
+  getUserByUsername: jest.fn().mockImplementation((username) => {
+    if (!username) {
+      return Promise.reject(new Error('Username is required'));
+    }
     return Promise.resolve(null);
   }),
   getUser: jest.fn(),
@@ -14,10 +17,15 @@ const mockStorage = {
   sessionStore: {}
 };
 
-// Mock de bcrypt con implementación simple
+// Mock básico de bcrypt con manejo de errores
 const mockBcrypt = {
-  hash: jest.fn(() => Promise.resolve('hashedpassword')),
-  compare: jest.fn(() => Promise.resolve(false))
+  hash: jest.fn().mockImplementation(() => Promise.resolve('hashedpassword')),
+  compare: jest.fn().mockImplementation((plaintext, hash) => {
+    if (!plaintext || !hash) {
+      return Promise.reject(new Error('Invalid arguments'));
+    }
+    return Promise.resolve(plaintext === 'correctpassword' && hash === 'hashedpassword');
+  })
 };
 
 // Mock de express-session

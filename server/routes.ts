@@ -25,29 +25,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Login route
   app.post("/api/login", async (req, res) => {
-    // Validación inicial del body
-    const body = req.body;
-    console.log("Login attempt body:", body);
-
-    if (!body || typeof body !== 'object' || !body.username || !body.password) {
-      return res.status(400).json({ message: "Credenciales inválidas" });
-    }
-
-    const { username, password } = body;
-
     try {
-      const user = await storage.getUserByUsername(username);
+      // Initial body validation
+      if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({ message: "Credenciales inválidas" });
+      }
+
+      const { username, password } = req.body;
+
+      // Required fields validation
+      if (!username || !password) {
+        return res.status(400).json({ message: "Credenciales inválidas" });
+      }
+
+      // Find user - wrap in try/catch to handle potential storage errors
+      let user;
+      try {
+        user = await storage.getUserByUsername(username);
+      } catch (error) {
+        console.error("Error searching for user:", error);
+        return res.status(401).json({ message: "Credenciales inválidas" });
+      }
 
       if (!user) {
         return res.status(401).json({ message: "Credenciales inválidas" });
       }
 
-      const isValid = await bcrypt.compare(password, user.password);
+      // Validate password - wrap in try/catch to handle potential bcrypt errors
+      let isValid;
+      try {
+        isValid = await bcrypt.compare(password, user.password);
+      } catch (error) {
+        console.error("Error comparing passwords:", error);
+        return res.status(401).json({ message: "Credenciales inválidas" });
+      }
 
       if (!isValid) {
         return res.status(401).json({ message: "Credenciales inválidas" });
       }
 
+      // Successful login
       return res.status(200).json({
         id: user.id,
         username: user.username,
@@ -55,7 +72,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("Error en ruta de login:", error);
+      // This catch should never be reached, but just in case
+      console.error("Unexpected error in login route:", error);
       return res.status(500).json({ message: "Error en el servidor" });
     }
   });
