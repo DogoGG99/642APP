@@ -1,13 +1,15 @@
-const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals');
+const { describe, it, expect, beforeAll, beforeEach, afterAll } = require('@jest/globals');
 const request = require('supertest');
 const express = require('express');
+const { createServer } = require('http');
 
 describe('Shift Management Tests', () => {
   let app;
   let mockStorage;
+  let server;
   const mockUser = { 
     id: 1, 
-    username: 'testuser', 
+    username: 'testuser',
     role: 'user' 
   };
 
@@ -26,13 +28,17 @@ describe('Shift Management Tests', () => {
       next();
     });
 
-    // Import routes dynamically
-    const { registerRoutes } = await import('../server/routes.js');
-    await registerRoutes(app);
+    // Import routes after mocks are set up
+    const routes = require('../server/routes');
+    server = await routes.registerRoutes(app);
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll((done) => {
+    server.close(done);
   });
 
   describe('Open Shift Tests', () => {
@@ -47,7 +53,6 @@ describe('Shift Management Tests', () => {
         notes: null
       };
 
-      // Mock storage to return active shift
       mockStorage.getActiveShift.mockResolvedValue(mockActiveShift);
 
       const response = await request(app)
@@ -58,16 +63,12 @@ describe('Shift Management Tests', () => {
           notes: ''
         });
 
-      console.log('Response status:', response.status);
-      console.log('Response body:', response.body);
-
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('message', 'Ya tienes un turno activo');
       expect(mockStorage.getActiveShift).toHaveBeenCalledWith(mockUser.id);
     });
 
     it('should successfully open a new shift', async () => {
-      // Mock storage to return no active shift
       mockStorage.getActiveShift.mockResolvedValue(null);
 
       const shiftData = {
@@ -89,9 +90,6 @@ describe('Shift Management Tests', () => {
       const response = await request(app)
         .post('/api/shifts')
         .send(shiftData);
-
-      console.log('Response status:', response.status);
-      console.log('Response body:', response.body);
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id', newShift.id);

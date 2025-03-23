@@ -6,7 +6,10 @@ module.exports = {
     '^@shared/(.*)$': '<rootDir>/shared/$1'
   },
   transform: {
-    '^.+\\.[jt]sx?$': ['babel-jest', {
+    '^.+\\.tsx?$': ['babel-jest', {
+      configFile: './babel.config.cjs'
+    }],
+    '^.+\\.jsx?$': ['babel-jest', {
       configFile: './babel.config.cjs'
     }]
   },

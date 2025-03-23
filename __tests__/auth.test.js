@@ -1,11 +1,13 @@
 const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals');
 const request = require('supertest');
 const express = require('express');
+const { createServer } = require('http');
 
 describe('Authentication Tests', () => {
   let app;
   let mockStorage;
   let mockBcrypt;
+  let server;
 
   beforeAll(async () => {
     // Get mocks from global setup
@@ -24,12 +26,16 @@ describe('Authentication Tests', () => {
     });
 
     // Import routes after mocks are set up
-    const { registerRoutes } = await import('../server/routes.js');
-    await registerRoutes(app);
+    const routes = require('../server/routes');
+    server = await routes.registerRoutes(app);
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll((done) => {
+    server.close(done);
   });
 
   describe('Login Tests', () => {
@@ -47,9 +53,6 @@ describe('Authentication Tests', () => {
           username: 'testuser',
           password: 'wrongpassword'
         });
-
-      console.log('Response status:', response.status);
-      console.log('Response body:', response.body);
 
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('message', 'Credenciales inválidas');
@@ -70,9 +73,6 @@ describe('Authentication Tests', () => {
           username: 'testuser',
           password: 'correctpassword'
         });
-
-      console.log('Response status:', response.status);
-      console.log('Response body:', response.body);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('id', 1);
