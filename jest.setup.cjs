@@ -1,10 +1,10 @@
 const { TextEncoder, TextDecoder } = require('util');
+const path = require('path');
 
-// Configure global encoders/decoders
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Configure mock storage
+// Mock storage
 const mockStorage = {
   getUserByUsername: jest.fn(),
   getUser: jest.fn(),
@@ -14,7 +14,7 @@ const mockStorage = {
   updateShift: jest.fn()
 };
 
-// Configure bcrypt mock
+// Mock bcrypt
 const mockBcrypt = {
   hash: jest.fn().mockImplementation(() => Promise.resolve('hashedPassword')),
   compare: jest.fn().mockImplementation(() => Promise.resolve(true))
@@ -22,7 +22,10 @@ const mockBcrypt = {
 
 // Mock modules
 jest.mock('bcrypt', () => mockBcrypt);
-jest.mock('server/storage', () => ({
+
+// Use require.resolve to get the actual path of the module
+const storagePath = require.resolve('../server/storage');
+jest.mock(storagePath, () => ({
   storage: mockStorage
 }));
 
@@ -32,4 +35,4 @@ global.__mocks__ = {
   storage: mockStorage
 };
 
-console.log('Jest setup completed - mocks configured');
+console.log('Jest setup completed');

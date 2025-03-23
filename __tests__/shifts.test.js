@@ -1,6 +1,7 @@
 const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals');
 const request = require('supertest');
 const express = require('express');
+const path = require('path');
 
 describe('Shift Management Tests', () => {
   let app;
@@ -15,7 +16,10 @@ describe('Shift Management Tests', () => {
     console.log('Setting up Shift Management Tests');
     mockStorage = global.__mocks__.storage;
 
-    const { registerRoutes } = require('server/routes');
+    // Use require.resolve to get the actual path
+    const routesPath = require.resolve('../server/routes');
+    const { registerRoutes } = require(routesPath);
+
     app = express();
     app.use(express.json());
 
