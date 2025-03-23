@@ -2,8 +2,6 @@ const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals')
 const request = require('supertest');
 const express = require('express');
 const bcrypt = require('bcrypt');
-const { storage } = require('../server/storage');
-const { registerRoutes } = require('../server/routes');
 
 // Mock storage
 const mockStorage = {
@@ -11,13 +9,11 @@ const mockStorage = {
   createUser: jest.fn()
 };
 
-jest.mock('../server/storage', () => ({
+// Mock modules
+jest.mock('bcrypt');
+jest.mock('server/storage', () => ({
   storage: mockStorage
 }));
-
-jest.mock('bcrypt');
-
-console.log('Loading auth.test.js');
 
 describe('Authentication Tests', () => {
   let app;
@@ -29,37 +25,32 @@ describe('Authentication Tests', () => {
   };
 
   beforeAll(async () => {
-    console.log('Setting up auth tests');
+    const { registerRoutes } = require('server/routes');
+
     app = express();
     app.use(express.json());
 
+    // Mock authentication middleware
     app.use((req, _res, next) => {
       req.isAuthenticated = () => true;
       req.user = mockUser;
       next();
     });
 
-    const server = await registerRoutes(app);
-    return server;
+    await registerRoutes(app);
   });
 
   beforeEach(() => {
-    console.log('Clearing mocks before test');
     jest.clearAllMocks();
   });
 
   describe('Login Tests', () => {
     it('should return 401 when credentials are invalid', async () => {
-      console.log('Running invalid credentials test');
-      mockStorage.getUserByUsername.mockResolvedValue({
-        id: 1,
-        username: 'testuser',
-        password: 'hashedpassword',
-        role: 'user'
-      });
-
+      // Arrange
+      mockStorage.getUserByUsername.mockResolvedValue(mockUser);
       bcrypt.compare.mockResolvedValueOnce(false);
 
+      // Act
       const response = await request(app)
         .post('/api/login')
         .send({
@@ -67,15 +58,18 @@ describe('Authentication Tests', () => {
           password: 'wrongpassword'
         });
 
+      // Assert
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('message', 'Credenciales inválidas');
+      expect(mockStorage.getUserByUsername).toHaveBeenCalledWith('testuser');
     });
 
     it('should return 200 and user data when credentials are valid', async () => {
-      console.log('Running valid credentials test');
+      // Arrange
       mockStorage.getUserByUsername.mockResolvedValue(mockUser);
       bcrypt.compare.mockResolvedValueOnce(true);
 
+      // Act
       const response = await request(app)
         .post('/api/login')
         .send({
@@ -83,15 +77,18 @@ describe('Authentication Tests', () => {
           password: 'correctpassword'
         });
 
+      // Assert
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('id', mockUser.id);
       expect(response.body).toHaveProperty('username', mockUser.username);
+      expect(mockStorage.getUserByUsername).toHaveBeenCalledWith('testuser');
     });
 
     it('should handle server errors during login', async () => {
-      console.log('Running server error test');
+      // Arrange
       mockStorage.getUserByUsername.mockRejectedValue(new Error('Database error'));
 
+      // Act
       const response = await request(app)
         .post('/api/login')
         .send({
@@ -99,6 +96,7 @@ describe('Authentication Tests', () => {
           password: 'password'
         });
 
+      // Assert
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty('message', 'Error en el servidor');
     });
