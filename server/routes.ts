@@ -25,39 +25,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Login route
   app.post("/api/login", async (req, res) => {
-    // Validate request body
-    if (!req.body || typeof req.body !== 'object') {
+    // Validación inicial del body
+    const body = req.body;
+    console.log("Login attempt body:", body);
+
+    if (!body || typeof body !== 'object' || !body.username || !body.password) {
       return res.status(400).json({ message: "Credenciales inválidas" });
     }
 
-    const { username, password } = req.body;
-
-    // Validate required fields
-    if (!username || !password) {
-      return res.status(400).json({ message: "Credenciales inválidas" });
-    }
+    const { username, password } = body;
 
     try {
-      // Get user from storage
       const user = await storage.getUserByUsername(username);
+
       if (!user) {
         return res.status(401).json({ message: "Credenciales inválidas" });
       }
 
-      // Compare password
-      const isValidPassword = await bcrypt.compare(password, user.password);
-      if (!isValidPassword) {
+      const isValid = await bcrypt.compare(password, user.password);
+
+      if (!isValid) {
         return res.status(401).json({ message: "Credenciales inválidas" });
       }
 
-      // Login successful
       return res.status(200).json({
         id: user.id,
         username: user.username,
         role: user.role
       });
+
     } catch (error) {
-      console.error("Error in login route:", error);
+      console.error("Error en ruta de login:", error);
       return res.status(500).json({ message: "Error en el servidor" });
     }
   });

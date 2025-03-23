@@ -10,25 +10,19 @@ describe('Authentication Tests', () => {
   let server;
 
   beforeAll(async () => {
-    // Get mocks from global setup
     mockStorage = global.__mocks__.storage;
     mockBcrypt = global.__mocks__.bcrypt;
 
-    // Setup Express app with explicit middleware
     app = express();
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    // Import routes after mocks are set up
     const routes = require('../server/routes');
     server = await routes.registerRoutes(app);
   });
 
   beforeEach(() => {
-    // Reset all mocks before each test
     jest.clearAllMocks();
-    mockStorage.getUserByUsername.mockReset();
-    mockBcrypt.compare.mockReset();
   });
 
   afterAll((done) => {
@@ -38,20 +32,22 @@ describe('Authentication Tests', () => {
 
   describe('Login Tests', () => {
     it('should return 400 when credentials are missing', async () => {
-      mockStorage.getUserByUsername.mockResolvedValue(null); //Reinstate this line
       const response = await request(app)
         .post('/api/login')
+        .set('Content-Type', 'application/json')
         .send({});
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('message', 'Credenciales inválidas');
+      expect(mockStorage.getUserByUsername).not.toHaveBeenCalled();
     });
 
     it('should return 401 when user does not exist', async () => {
-      mockStorage.getUserByUsername.mockResolvedValue(null); //Reinstate this line
+      mockStorage.getUserByUsername.mockResolvedValue(null);
 
       const response = await request(app)
         .post('/api/login')
+        .set('Content-Type', 'application/json')
         .send({
           username: 'nonexistent',
           password: 'password'
@@ -59,18 +55,23 @@ describe('Authentication Tests', () => {
 
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('message', 'Credenciales inválidas');
+      expect(mockStorage.getUserByUsername).toHaveBeenCalledWith('nonexistent');
     });
 
     it('should return 401 when password is incorrect', async () => {
-      mockStorage.getUserByUsername.mockResolvedValue({
+      const testUser = {
         id: 1,
         username: 'testuser',
-        password: 'hashedpassword'
-      });
+        password: 'hashedpassword',
+        role: 'user'
+      };
+
+      mockStorage.getUserByUsername.mockResolvedValue(testUser);
       mockBcrypt.compare.mockResolvedValue(false);
 
       const response = await request(app)
         .post('/api/login')
+        .set('Content-Type', 'application/json')
         .send({
           username: 'testuser',
           password: 'wrongpassword'
@@ -81,25 +82,30 @@ describe('Authentication Tests', () => {
     });
 
     it('should return 200 and user data when credentials are valid', async () => {
-      mockStorage.getUserByUsername.mockResolvedValue({
+      const testUser = {
         id: 1,
         username: 'testuser',
         password: 'hashedpassword',
         role: 'user'
-      });
+      };
+
+      mockStorage.getUserByUsername.mockResolvedValue(testUser);
       mockBcrypt.compare.mockResolvedValue(true);
 
       const response = await request(app)
         .post('/api/login')
+        .set('Content-Type', 'application/json')
         .send({
           username: 'testuser',
           password: 'correctpassword'
         });
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('id', 1);
-      expect(response.body).toHaveProperty('username', 'testuser');
-      expect(response.body).toHaveProperty('role', 'user');
+      expect(response.body).toEqual({
+        id: testUser.id,
+        username: testUser.username,
+        role: testUser.role
+      });
     });
   });
 });
