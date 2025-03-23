@@ -2,7 +2,7 @@ const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Mock simple de storage
+// Mock de storage con métodos para usuarios y turnos
 const mockStorage = {
   getUserByUsername: jest.fn().mockImplementation((username) => {
     if (username === 'test') {
@@ -14,6 +14,20 @@ const mockStorage = {
       });
     }
     return Promise.resolve(null);
+  }),
+  getActiveShift: jest.fn().mockImplementation((userId) => {
+    return Promise.resolve(null);
+  }),
+  createShift: jest.fn().mockImplementation((data) => {
+    return Promise.resolve({
+      id: 1,
+      userId: data.userId,
+      startTime: data.startTime,
+      endTime: null,
+      status: 'active',
+      shiftType: data.shiftType,
+      notes: data.notes
+    });
   })
 };
 
