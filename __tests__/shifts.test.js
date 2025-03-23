@@ -35,10 +35,13 @@ describe('Shift Management Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStorage.getActiveShift.mockReset();
+    mockStorage.createShift.mockReset();
   });
 
   afterAll((done) => {
-    server.close(done);
+    if (server) server.close(done);
+    else done();
   });
 
   describe('Open Shift Tests', () => {

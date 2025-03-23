@@ -4,6 +4,9 @@ import { storage } from "./storage";
 import { setupAuth, requireRole } from "./auth";
 import { insertClientSchema, insertInventorySchema, insertReservationSchema, insertBillSchema } from "@shared/schema";
 import { insertShiftSchema } from "@shared/schema";
+import passport from "passport";
+import bcrypt from "bcrypt";
+import express from "express";
 
 // Middleware to check if user is authenticated
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
@@ -14,12 +17,55 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup middleware
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
   setupAuth(app);
+
+  // Login route
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+
+      // Validate required fields
+      if (!username || !password) {
+        return res.status(400).json({ message: "Credenciales inválidas" });
+      }
+
+      // Get user from storage
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ message: "Credenciales inválidas" });
+      }
+
+      // Compare password (simplified error handling)
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Credenciales inválidas" });
+      }
+
+      // Login successful
+      return res.status(200).json({
+        id: user.id,
+        username: user.username,
+        role: user.role
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      return res.status(500).json({ message: "Error en el servidor" });
+    }
+  });
 
   // Client routes
   app.get("/api/clients", requireAuth, async (_req, res) => {
-    const clients = await storage.getClients();
-    res.json(clients);
+    try {
+      const clients = await storage.getClients();
+      res.json(clients);
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+      res.status(500).json({ message: "Failed to fetch clients" });
+    }
   });
 
   app.post("/api/clients", requireAuth, async (req, res) => {
@@ -259,9 +305,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Verificar que el turno existe y pertenece al usuario
       const shift = await storage.getActiveShift(req.user!.id);
       if (!shift || shift.id !== id) {
-        console.log("No se encontró el turno activo o no pertenece al usuario:", { 
-          shiftId: id, 
-          userId: req.user!.id 
+        console.log("No se encontró el turno activo o no pertenece al usuario:", {
+          shiftId: id,
+          userId: req.user!.id
         });
         return res.status(404).json({ message: "Turno no encontrado" });
       }
@@ -273,9 +319,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'closed'
       });
 
-      console.log("Turno cerrado exitosamente:", { 
-        shiftId: id, 
-        newStatus: updatedShift.status 
+      console.log("Turno cerrado exitosamente:", {
+        shiftId: id,
+        newStatus: updatedShift.status
       });
 
       res.json(updatedShift);

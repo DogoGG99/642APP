@@ -2,39 +2,41 @@ const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Configure mocks
+// Configure storage mock
 const mockStorage = {
   getUserByUsername: jest.fn(),
   getUser: jest.fn(),
   getActiveShift: jest.fn(),
   createShift: jest.fn(),
-  updateShift: jest.fn()
+  updateShift: jest.fn(),
+  sessionStore: {}
 };
 
+// Configure bcrypt mock with simplified behavior
 const mockBcrypt = {
-  hash: jest.fn().mockImplementation(() => Promise.resolve('hashedPassword')),
-  compare: jest.fn().mockImplementation(() => Promise.resolve(true))
+  hash: jest.fn().mockResolvedValue('hashedpassword'),
+  compare: jest.fn().mockImplementation((plaintext, _hash) => {
+    return Promise.resolve(plaintext === 'correctpassword');
+  })
 };
 
-// Mock dependencies in the correct order
+// Mock express-session first to avoid circular dependencies
 jest.mock('express-session', () => {
   return jest.fn(() => (_req, _res, next) => next());
 });
 
+// Mock bcrypt with explicit behavior
 jest.mock('bcrypt', () => mockBcrypt);
 
-jest.mock('./server/storage', () => {
-  const storage = mockStorage;
-  storage.__esModule = true;
-  storage.default = mockStorage;
-  storage.storage = mockStorage;
-  return storage;
-});
+// Mock storage with proper ES module support
+jest.mock('./server/storage', () => ({
+  __esModule: true,
+  storage: mockStorage,
+  default: mockStorage
+}));
 
-// Ensure all mocks are available globally
+// Make mocks available globally
 global.__mocks__ = {
   bcrypt: mockBcrypt,
   storage: mockStorage
 };
-
-// Add any additional mocks or global setup needed for tests
