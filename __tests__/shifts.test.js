@@ -26,7 +26,7 @@ describe('Shift Management Tests', () => {
       next();
     });
 
-    // Import routes after mocks are set up
+    // Import routes dynamically
     const { registerRoutes } = await import('../server/routes.js');
     await registerRoutes(app);
   });

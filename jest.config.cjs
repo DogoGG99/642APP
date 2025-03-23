@@ -7,12 +7,7 @@ module.exports = {
   },
   transform: {
     '^.+\\.[jt]sx?$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', {
-          targets: { node: 'current' }
-        }],
-        '@babel/preset-typescript'
-      ]
+      configFile: './babel.config.cjs'
     }]
   },
   testMatch: [
@@ -23,7 +18,7 @@ module.exports = {
   verbose: true,
   testTimeout: 10000,
   transformIgnorePatterns: [
-    'node_modules/(?!(@shared|drizzle-zod|drizzle-orm|zod)/)'
+    '/node_modules/(?!(@shared|drizzle-zod|drizzle-orm|zod)/)'
   ],
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json', 'node']
 };

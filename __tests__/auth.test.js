@@ -39,7 +39,7 @@ describe('Authentication Tests', () => {
         username: 'testuser',
         password: 'hashedpassword' 
       });
-      mockBcrypt.compare.mockResolvedValueOnce(false);
+      mockBcrypt.compare.mockResolvedValue(false);
 
       const response = await request(app)
         .post('/api/login')
@@ -47,6 +47,9 @@ describe('Authentication Tests', () => {
           username: 'testuser',
           password: 'wrongpassword'
         });
+
+      console.log('Response status:', response.status);
+      console.log('Response body:', response.body);
 
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('message', 'Credenciales inválidas');
@@ -59,7 +62,7 @@ describe('Authentication Tests', () => {
         username: 'testuser',
         password: 'hashedpassword' 
       });
-      mockBcrypt.compare.mockResolvedValueOnce(true);
+      mockBcrypt.compare.mockResolvedValue(true);
 
       const response = await request(app)
         .post('/api/login')
@@ -67,6 +70,9 @@ describe('Authentication Tests', () => {
           username: 'testuser',
           password: 'correctpassword'
         });
+
+      console.log('Response status:', response.status);
+      console.log('Response body:', response.body);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('id', 1);

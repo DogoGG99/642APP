@@ -16,21 +16,22 @@ const mockBcrypt = {
   compare: jest.fn().mockImplementation(() => Promise.resolve(true))
 };
 
-// Mock express-session
+// Mock express-session first
 jest.mock('express-session', () => {
-  return jest.fn(() => {
-    return (_req, _res, next) => next();
-  });
+  return jest.fn(() => (_req, _res, next) => next());
 });
-
-// Mock storage module
-jest.mock('./server/storage.js', () => ({
-  storage: mockStorage,
-  default: mockStorage
-}));
 
 // Mock bcrypt
 jest.mock('bcrypt', () => mockBcrypt);
+
+// Mock storage with proper ES module support
+jest.mock('./server/storage.ts', () => {
+  return {
+    __esModule: true,
+    storage: mockStorage,
+    default: mockStorage
+  };
+});
 
 // Make mocks available globally
 global.__mocks__ = {
