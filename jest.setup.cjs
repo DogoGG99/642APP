@@ -2,47 +2,37 @@ const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Mock básico de storage con manejo de errores
+// Mock simple de storage
 const mockStorage = {
   getUserByUsername: jest.fn().mockImplementation((username) => {
-    if (!username) {
-      return Promise.reject(new Error('Username is required'));
+    if (username === 'test') {
+      return Promise.resolve({
+        id: 1,
+        username: 'test',
+        password: 'hash',
+        role: 'user'
+      });
     }
     return Promise.resolve(null);
-  }),
-  getUser: jest.fn(),
-  getActiveShift: jest.fn(),
-  createShift: jest.fn(),
-  updateShift: jest.fn(),
-  sessionStore: {}
-};
-
-// Mock básico de bcrypt con manejo de errores
-const mockBcrypt = {
-  hash: jest.fn().mockImplementation(() => Promise.resolve('hashedpassword')),
-  compare: jest.fn().mockImplementation((plaintext, hash) => {
-    if (!plaintext || !hash) {
-      return Promise.reject(new Error('Invalid arguments'));
-    }
-    return Promise.resolve(plaintext === 'correctpassword' && hash === 'hashedpassword');
   })
 };
 
-// Mock de express-session
-jest.mock('express-session', () => {
-  return jest.fn(() => (_req, _res, next) => next());
-});
+// Mock simple de bcrypt
+const mockBcrypt = {
+  compare: jest.fn().mockImplementation((pass, hash) => {
+    return Promise.resolve(pass === 'password' && hash === 'hash');
+  })
+};
+
+// Mock de los módulos
+jest.mock('./server/storage', () => ({
+  storage: mockStorage
+}));
 
 jest.mock('bcrypt', () => mockBcrypt);
 
-jest.mock('./server/storage', () => ({
-  __esModule: true,
-  storage: mockStorage,
-  default: mockStorage
-}));
-
-// Hacer los mocks disponibles globalmente
+// Exportar mocks para uso en tests
 global.__mocks__ = {
-  bcrypt: mockBcrypt,
-  storage: mockStorage
+  storage: mockStorage,
+  bcrypt: mockBcrypt
 };
