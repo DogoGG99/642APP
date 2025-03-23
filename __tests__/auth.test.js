@@ -1,7 +1,6 @@
 const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals');
 const request = require('supertest');
 const express = require('express');
-const { registerRoutes } = require('../server/routes');
 
 describe('Authentication Tests', () => {
   let app;
@@ -9,9 +8,11 @@ describe('Authentication Tests', () => {
   let mockBcrypt;
 
   beforeAll(async () => {
+    // Get mocks from global setup
     mockStorage = global.__mocks__.storage;
     mockBcrypt = global.__mocks__.bcrypt;
 
+    // Setup Express app
     app = express();
     app.use(express.json());
 
@@ -22,6 +23,8 @@ describe('Authentication Tests', () => {
       next();
     });
 
+    // Import routes after mocks are set up
+    const { registerRoutes } = await import('../server/routes.js');
     await registerRoutes(app);
   });
 

@@ -1,7 +1,6 @@
 const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals');
 const request = require('supertest');
 const express = require('express');
-const { registerRoutes } = require('../server/routes');
 
 describe('Shift Management Tests', () => {
   let app;
@@ -13,8 +12,10 @@ describe('Shift Management Tests', () => {
   };
 
   beforeAll(async () => {
+    // Get mock from global setup
     mockStorage = global.__mocks__.storage;
 
+    // Setup Express app
     app = express();
     app.use(express.json());
 
@@ -25,6 +26,8 @@ describe('Shift Management Tests', () => {
       next();
     });
 
+    // Import routes after mocks are set up
+    const { registerRoutes } = await import('../server/routes.js');
     await registerRoutes(app);
   });
 
@@ -44,14 +47,19 @@ describe('Shift Management Tests', () => {
         notes: null
       };
 
+      // Mock storage to return active shift
       mockStorage.getActiveShift.mockResolvedValue(mockActiveShift);
 
       const response = await request(app)
         .post('/api/shifts')
         .send({
           startTime: new Date().toISOString(),
-          shiftType: 'matutino'
+          shiftType: 'matutino',
+          notes: ''
         });
+
+      console.log('Response status:', response.status);
+      console.log('Response body:', response.body);
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('message', 'Ya tienes un turno activo');
@@ -59,33 +67,38 @@ describe('Shift Management Tests', () => {
     });
 
     it('should successfully open a new shift', async () => {
+      // Mock storage to return no active shift
       mockStorage.getActiveShift.mockResolvedValue(null);
+
+      const shiftData = {
+        startTime: new Date().toISOString(),
+        shiftType: 'matutino',
+        notes: ''
+      };
 
       const newShift = {
         id: 2,
         userId: mockUser.id,
-        startTime: new Date().toISOString(),
+        ...shiftData,
         endTime: null,
-        status: 'active',
-        shiftType: 'matutino',
-        notes: null
+        status: 'active'
       };
 
       mockStorage.createShift.mockResolvedValue(newShift);
 
       const response = await request(app)
         .post('/api/shifts')
-        .send({
-          startTime: new Date().toISOString(),
-          shiftType: 'matutino'
-        });
+        .send(shiftData);
+
+      console.log('Response status:', response.status);
+      console.log('Response body:', response.body);
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id', newShift.id);
       expect(response.body).toHaveProperty('status', 'active');
       expect(response.body).toHaveProperty('shiftType', 'matutino');
-      expect(mockStorage.createShift).toHaveBeenCalled();
       expect(mockStorage.getActiveShift).toHaveBeenCalledWith(mockUser.id);
+      expect(mockStorage.createShift).toHaveBeenCalled();
     });
   });
 });
