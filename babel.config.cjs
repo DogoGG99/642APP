@@ -1,16 +1,11 @@
 module.exports = {
   presets: [
     ['@babel/preset-env', {
-      targets: { node: 'current' },
-      modules: 'commonjs'
+      targets: { node: 'current' }
     }],
     '@babel/preset-typescript'
   ],
   plugins: [
-    ['@babel/plugin-transform-modules-commonjs', {
-      allowTopLevelThis: true,
-      loose: true,
-      strict: false
-    }]
+    '@babel/plugin-transform-modules-commonjs'
   ]
 };

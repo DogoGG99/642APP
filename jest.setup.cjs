@@ -1,6 +1,4 @@
 const { TextEncoder, TextDecoder } = require('util');
-const path = require('path');
-
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
@@ -20,15 +18,11 @@ const mockBcrypt = {
   compare: jest.fn().mockImplementation(() => Promise.resolve(true))
 };
 
-// Configure mocks before tests
-const storagePath = path.resolve(__dirname, 'server', 'storage.ts');
-const routesPath = path.resolve(__dirname, 'server', 'routes.ts');
-
-// Mock modules using explicit paths
-jest.mock(storagePath, () => ({
+// Configure mocks
+jest.mock('../server/storage', () => ({
   storage: mockStorage,
   default: mockStorage
-}), { virtual: true });
+}));
 
 jest.mock('bcrypt', () => mockBcrypt);
 
@@ -39,14 +33,8 @@ jest.mock('express-session', () => {
   });
 });
 
-// Make mocks available globally for tests
+// Make mocks available globally
 global.__mocks__ = {
   bcrypt: mockBcrypt,
-  storage: mockStorage,
-  paths: {
-    storage: storagePath,
-    routes: routesPath
-  }
+  storage: mockStorage
 };
-
-console.log('Jest setup completed');

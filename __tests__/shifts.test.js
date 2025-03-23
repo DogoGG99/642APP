@@ -1,6 +1,7 @@
 const { describe, it, expect, beforeAll, beforeEach } = require('@jest/globals');
 const request = require('supertest');
 const express = require('express');
+const { registerRoutes } = require('../server/routes');
 
 describe('Shift Management Tests', () => {
   let app;
@@ -13,8 +14,6 @@ describe('Shift Management Tests', () => {
 
   beforeAll(async () => {
     mockStorage = global.__mocks__.storage;
-
-    const { registerRoutes } = require(global.__mocks__.paths.routes);
 
     app = express();
     app.use(express.json());
