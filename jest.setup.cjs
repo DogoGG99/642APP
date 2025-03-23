@@ -2,7 +2,7 @@ const { TextEncoder, TextDecoder } = require('util');
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-// Configure storage mock
+// Configure storage mock with specific behaviors
 const mockStorage = {
   getUserByUsername: jest.fn(),
   getUser: jest.fn(),
@@ -12,7 +12,7 @@ const mockStorage = {
   sessionStore: {}
 };
 
-// Configure bcrypt mock with simplified behavior
+// Configure bcrypt mock with controlled behavior
 const mockBcrypt = {
   hash: jest.fn().mockResolvedValue('hashedpassword'),
   compare: jest.fn().mockImplementation((plaintext, _hash) => {
@@ -20,15 +20,13 @@ const mockBcrypt = {
   })
 };
 
-// Mock express-session first to avoid circular dependencies
+// Mock modules
 jest.mock('express-session', () => {
   return jest.fn(() => (_req, _res, next) => next());
 });
 
-// Mock bcrypt with explicit behavior
 jest.mock('bcrypt', () => mockBcrypt);
 
-// Mock storage with proper ES module support
 jest.mock('./server/storage', () => ({
   __esModule: true,
   storage: mockStorage,

@@ -25,6 +25,7 @@ describe('Authentication Tests', () => {
   });
 
   beforeEach(() => {
+    // Reset all mocks before each test
     jest.clearAllMocks();
     mockStorage.getUserByUsername.mockReset();
     mockBcrypt.compare.mockReset();
@@ -37,6 +38,7 @@ describe('Authentication Tests', () => {
 
   describe('Login Tests', () => {
     it('should return 400 when credentials are missing', async () => {
+      mockStorage.getUserByUsername.mockResolvedValue(null); //Reinstate this line
       const response = await request(app)
         .post('/api/login')
         .send({});
@@ -46,7 +48,7 @@ describe('Authentication Tests', () => {
     });
 
     it('should return 401 when user does not exist', async () => {
-      mockStorage.getUserByUsername.mockResolvedValue(null);
+      mockStorage.getUserByUsername.mockResolvedValue(null); //Reinstate this line
 
       const response = await request(app)
         .post('/api/login')

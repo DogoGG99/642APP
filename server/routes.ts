@@ -17,7 +17,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup middleware
+  // Setup middleware before routes
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
@@ -25,21 +25,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Login route
   app.post("/api/login", async (req, res) => {
+    // Validate request body
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({ message: "Credenciales inválidas" });
+    }
+
+    const { username, password } = req.body;
+
+    // Validate required fields
+    if (!username || !password) {
+      return res.status(400).json({ message: "Credenciales inválidas" });
+    }
+
     try {
-      const { username, password } = req.body;
-
-      // Validate required fields
-      if (!username || !password) {
-        return res.status(400).json({ message: "Credenciales inválidas" });
-      }
-
       // Get user from storage
       const user = await storage.getUserByUsername(username);
       if (!user) {
         return res.status(401).json({ message: "Credenciales inválidas" });
       }
 
-      // Compare password (simplified error handling)
+      // Compare password
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
         return res.status(401).json({ message: "Credenciales inválidas" });
@@ -52,7 +57,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: user.role
       });
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Error in login route:", error);
       return res.status(500).json({ message: "Error en el servidor" });
     }
   });
