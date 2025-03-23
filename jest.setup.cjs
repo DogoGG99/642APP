@@ -20,19 +20,33 @@ const mockBcrypt = {
   compare: jest.fn().mockImplementation(() => Promise.resolve(true))
 };
 
-// Mock modules
+// Configure mocks before tests
+const storagePath = path.resolve(__dirname, 'server', 'storage.ts');
+const routesPath = path.resolve(__dirname, 'server', 'routes.ts');
+
+// Mock modules using explicit paths
+jest.mock(storagePath, () => ({
+  storage: mockStorage,
+  default: mockStorage
+}), { virtual: true });
+
 jest.mock('bcrypt', () => mockBcrypt);
 
-// Use require.resolve to get the actual path of the module
-const storagePath = require.resolve('../server/storage');
-jest.mock(storagePath, () => ({
-  storage: mockStorage
-}));
+// Mock express-session
+jest.mock('express-session', () => {
+  return jest.fn(() => {
+    return (_req, _res, next) => next();
+  });
+});
 
-// Make mocks available globally
+// Make mocks available globally for tests
 global.__mocks__ = {
   bcrypt: mockBcrypt,
-  storage: mockStorage
+  storage: mockStorage,
+  paths: {
+    storage: storagePath,
+    routes: routesPath
+  }
 };
 
 console.log('Jest setup completed');
